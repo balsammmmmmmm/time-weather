@@ -140,6 +140,11 @@
     text-shadow: 0 4px 30px rgba(0,0,0,0.2);
     color: #ffffff;
   }
+  .time .ampm{
+    font-size:0.4em;
+    font-weight:300;
+    margin-left:8px;
+  }
   .date{
     margin-top:8px;
     color: rgba(255,255,255,0.95);
@@ -534,7 +539,7 @@ function updateClock(){
   const ampm = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
   const m = pad(now.getMinutes());
-  document.getElementById('time').textContent = `${h}:${m} ${ampm}`;
+  document.getElementById('time').innerHTML = `${h}:${m} <span class="ampm">${ampm}</span>`;
   document.getElementById('date').textContent = now.toLocaleString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 }
 updateClock();
