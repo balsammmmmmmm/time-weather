@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Clock + Weather Display</title>
+
+<!-- PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Clock Weather" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#2196f3" />
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%232196f3'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white'>⏰</text></svg>" />
+
+<!-- Manifest -->
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNsb2NrICYgV2VhdGhlciIsCiAgInNob3J0X25hbWUiOiAiQ2xvY2siLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2U4ZjBmNyIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2ZjMiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJz48cmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5MicgZmlsbD0nJTIzMjE5NmYzJy8+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGRvbWluYW50LWJhc2VsaW5lPSdtaWRkbGUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtc2l6ZT0nMTAwJyBmaWxsPSd3aGl0ZSc+4o6wPC90ZXh0Pjwvc3ZnPiIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyUyMzIxOTZmMycvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nbWlkZGxlJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LXNpemU9JzI4MCcgZmlsbD0nd2hpdGUnPuKOsDwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9" />
+
+<style>
+  :root{
+    --bg:#f0f4f8;
+    --card:#ffffff;
+    --muted:#e8eef5;
+    --accent:#2196f3;
+    --glass: rgba(255,255,255,0.5);
+    --text:#ffffff;
+  }
+  html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;}
+  body{
+    background: linear-gradient(180deg,#e8f0f7 0%, #f5f9fc 100%);
+    color: var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .bg-image{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    opacity:0;
+    transition:opacity 2s ease-in-out;
+    z-index:0;
+    pointer-events:none;
+  }
+  .bg-image.active{opacity:1;}
+  .wrap{position:relative;z-index:1;}
+  .wrap{
+    width:100%;
+    max-width:1400px;
+    margin:24px;
+    display:flex;
+    flex-direction:column;
+    gap:30px;
+    align-items:center;
+    transition: transform 0.8s ease-in-out;
+  }
+  .main-row{
+    display:flex;
+    flex-direction:row;
+    gap:60px;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    flex-wrap:nowrap;
+  }
+
+  /* responsive */
+  @media (max-width:900px){
+    .wrap{padding-bottom:40px;}
+    .main-row{flex-wrap:wrap;gap:30px;}
+  }
+  
+  /* iPhone landscape optimization */
+  @media (max-width: 926px) and (orientation: landscape) {
+    .wrap{
+      gap:30px;
+      margin:16px;
+      max-width:100%;
+    }
+    .clockCard{padding:20px;}
+    .weatherCard{padding:20px;}
+    .time{font-size: clamp(60px, 10vw, 100px);}
+    .temp{font-size: clamp(80px, 12vw, 120px);}
+  }
+  
+  /* iPad landscape optimization */
+  @media (min-width: 927px) and (max-width: 1366px) and (orientation: landscape) {
+    .wrap{
+      max-width:1200px;
+    }
+  }
+
+  .clockCard{
+    background: transparent;
+    border-radius:18px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    box-shadow: none;
+    min-height:auto;
+    backdrop-filter: none;
+    border: none;
+    text-align:center;
+  }
+
+  .time{
+    font-weight:300;
+    font-size: clamp(60px, 12vw, 120px);
+    line-height:0.9;
+    letter-spacing: -3px;
+    text-shadow: 0 4px 30px rgba(0,0,0,0.2);
+    color: #ffffff;
+  }
+  .date{
+    margin-top:8px;
+    color: rgba(255,255,255,0.95);
+    font-size:1.8rem;
+    text-shadow: 0 2px 15px rgba(0,0,0,0.2);
+    font-weight:300;
+  }
+  .theme-toggle{
+    position:fixed;
+    top:20px;
+    right:20px;
+    z-index:999;
+    background:rgba(255,255,255,0.3);
+    border:1px solid rgba(255,255,255,0.3);
+    backdrop-filter:blur(10px);
+    padding:12px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:1.1rem;
+    transition:transform 0.2s;
+    color:#ffffff;
+    font-weight:300;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .theme-toggle:hover{transform:scale(1.05);}
+  
+  .rotation-toggle{
+    position:fixed;
+    top:20px;
+    right:75px;
+    z-index:999;
+    background:rgba(255,255,255,0.3);
+    border:1px solid rgba(255,255,255,0.3);
+    backdrop-filter:blur(10px);
+    padding:8px 14px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:0.85rem;
+    transition:all 0.2s;
+    color:#ffffff;
+    font-weight:300;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    white-space:nowrap;
+  }
+  .rotation-toggle:hover{transform:scale(1.05);}
+  .rotation-toggle.active{
+    background:rgba(33,150,243,0.4);
+    border:1px solid rgba(33,150,243,0.5);
+  }
+
+  .weatherCard{
+    background: rgba(255,255,255,0.25);
+    border-radius:24px;
+    padding:40px 50px;
+    display:flex;
+    flex-direction:row;
+    gap:40px;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+    min-height:auto;
+    backdrop-filter: none;
+    border: 1px solid rgba(255,255,255,0.3);
+    max-width:600px;
+  }
+  .weather-left{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:5px;
+  }
+  .weather-right{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .forecast-container{
+    width:100%;
+    max-width:1200px;
+    margin-top:0px;
+  }
+  .loc{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    width:100%;
+    justify-content:flex-start;
+  }
+  .loc h2{margin:0;font-size:1.8rem;color:#ffffff;font-weight:300;}
+  .temp{
+    font-size: clamp(90px, 15vw, 160px);
+    font-weight:200;
+    color:#ffffff;
+    line-height:0.9;
+    letter-spacing:-3px;
+  }
+  .temp-unit{
+    font-size:0.4em;
+    font-weight:300;
+    vertical-align:top;
+  }
+  .desc{color:rgba(255,255,255,0.9);font-size:1.2rem;font-weight:300;}
+  .meta{display:none;}
+  .small{font-size:0.88rem;color:var(--muted)}
+  .controls{display:none;}
+  input[type="text"]{
+    background:var(--glass);
+    border:1px solid rgba(255,255,255,0.03);
+    color:inherit;
+    padding:8px 12px;border-radius:10px;
+    width:100%;max-width:240px;font-size:1rem;
+    outline:none;
+  }
+  button{
+    background: linear-gradient(180deg,#2196f3, #1976d2);
+    border:none;padding:9px 12px;border-radius:10px;color:#ffffff;font-weight:700;
+    cursor:pointer;
+    box-shadow: 0 6px 18px rgba(33,150,243,0.3);
+  }
+  footer{margin-top:8px;color:var(--muted);font-size:0.78rem;text-align:center}
+  .loading{opacity:0.9;font-size:0.95rem;color:rgba(255,255,255,0.8);font-weight:300;}
+  .forecast-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:12px;
+    width:100%;
+  }
+  .forecast-day{
+    background:rgba(255,255,255,0.25);
+    border-radius:16px;
+    padding:16px 12px;
+    text-align:center;
+    font-size:0.95rem;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .forecast-day-name{
+    font-weight:400;
+    margin-bottom:8px;
+    color:#ffffff;
+    font-size:1rem;
+  }
+  .forecast-icon{font-size:28px;margin:8px 0}
+  .forecast-temp{
+    color:rgba(255,255,255,0.9);
+    font-size:0.9rem;
+    font-weight:300;
+  }
+  @media (max-width:900px){
+    .forecast-grid{grid-template-columns:repeat(4,1fr)}
+    .forecast-day:nth-child(n+5){display:none}
+  }
+</style>
+</head>
+<body>
+  <button class="theme-toggle" id="themeToggle" aria-label="Change wallpaper">⟳</button>
+  <button class="rotation-toggle active" id="rotationToggle" aria-label="Toggle rotation">Auto Rotate</button>
+  
+  <div class="bg-image" id="bg1"></div>
+  <div class="bg-image" id="bg2"></div>
+  
+  <div class="wrap" role="main">
+    <div class="main-row">
+      <div class="clockCard" aria-live="polite">
+        <div class="time" id="time">--:--</div>
+        <div class="date" id="date">Loading date…</div>
+      </div>
+
+      <div class="weatherCard" aria-live="polite">
+        <div class="weather-left">
+          <div class="temp" id="temp">--<span class="temp-unit">°</span></div>
+        </div>
+        
+        <div class="weather-right">
+          <div class="loc">
+            <h2 id="location">Detecting...</h2>
+          </div>
+          <div class="loading" id="lastUpdated">--</div>
+          <div class="desc" id="description">—</div>
+        </div>
+
+        <div class="meta" id="meta">
+          <div id="feels">Feels: --°</div>
+          <div id="wind">Wind: --</div>
+          <div id="humidity">Humidity: --</div>
+        </div>
+
+        <div class="controls">
+          <input id="search" placeholder="Search city (fallback) — e.g., Miami" aria-label="Search city name" />
+          <button id="searchBtn">Search</button>
+        </div>
+        <div class="small" id="error" role="status" style="color:#ffb4b4"></div>
+      </div>
+    </div>
+
+    <div id="forecast" class="forecast-container"></div>
+  </div>
+
+<script>
+/* BACKGROUND IMAGE ROTATION */
+const bgImages = [
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=3840&q=95',
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=3840&q=95',
+  'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=3840&q=95',
+  'https://images.unsplash.com/photo-1534270804882-64b7be39d5f3?w=3840&q=95',
+  'https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=3840&q=95',
+  'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=3840&q=95',
+  'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=3840&q=95',
+  'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=3840&q=95',
+  'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=3840&q=95',
+  'https://images.unsplash.com/photo-1491466424936-e304919aada7?w=3840&q=95',
+  'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1545289414-1c3cb1c06238?w=3840&q=95',
+  'https://images.unsplash.com/photo-1485082669661-e6e2e4e6b1e4?w=3840&q=95',
+  'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=3840&q=95',
+  'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=3840&q=95',
+  'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=3840&q=95',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=3840&q=95',
+  'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=3840&q=95',
+  'https://images.unsplash.com/photo-1478358161113-b0e11994a36b?w=3840&q=95',
+  'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=3840&q=95',
+  'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=3840&q=95',
+  'https://images.unsplash.com/photo-1480497490787-505ec076689f?w=3840&q=95',
+  'https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=3840&q=95',
+  'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=3840&q=95',
+  'https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?w=3840&q=95',
+  'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=3840&q=95',
+  'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=3840&q=95',
+  'https://images.unsplash.com/photo-1445905595283-21f8ae8a33d2?w=3840&q=95',
+  'https://images.unsplash.com/photo-1470071131384-0be1f11d3e1a?w=3840&q=95',
+  'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=3840&q=95',
+  'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=3840&q=95',
+  'https://images.unsplash.com/photo-1506260408121-e353d10b87c7?w=3840&q=95',
+  'https://images.unsplash.com/photo-1488034976201-ffbaa99cbf5c?w=3840&q=95',
+  'https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=3840&q=95',
+  'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=3840&q=95',
+  'https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=3840&q=95',
+  'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?w=3840&q=95',
+  'https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=3840&q=95',
+  'https://images.unsplash.com/photo-1444080748397-f442aa95c3e5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=3840&q=95',
+  'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=3840&q=95',
+  'https://images.unsplash.com/photo-1502224562085-639556652f33?w=3840&q=95',
+  'https://images.unsplash.com/photo-1502175353174-a7a70e73b362?w=3840&q=95',
+  'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=3840&q=95',
+  'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=3840&q=95',
+  'https://images.unsplash.com/photo-1428908728789-d2de25dbd4e2?w=3840&q=95',
+  'https://images.unsplash.com/photo-1470043201067-764120126eb4?w=3840&q=95',
+  'https://images.unsplash.com/photo-1484821582734-6c6c9f99a672?w=3840&q=95',
+  'https://images.unsplash.com/photo-1487700160041-babef9c3cb55?w=3840&q=95',
+  'https://images.unsplash.com/photo-1499363145340-41a847a534d1?w=3840&q=95',
+  'https://images.unsplash.com/photo-1501436513145-30f24e19fcc8?w=3840&q=95',
+  'https://images.unsplash.com/photo-1490604001847-b712b0c2f967?w=3840&q=95',
+  'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=3840&q=95',
+  'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe?w=3840&q=95',
+  'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=3840&q=95',
+  'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=3840&q=95',
+  'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=3840&q=95',
+  'https://images.unsplash.com/photo-1465146633011-14f8e0781093?w=3840&q=95',
+  'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=3840&q=95',
+  'https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=3840&q=95',
+  'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=3840&q=95',
+  'https://images.unsplash.com/photo-1492571350019-22de08371fd3?w=3840&q=95',
+  'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=3840&q=95',
+  'https://images.unsplash.com/photo-1540206395-68808572332f?w=3840&q=95',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=3840&q=95',
+  'https://images.unsplash.com/photo-1519505907962-0a6cb0167c73?w=3840&q=95',
+  'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=3840&q=95',
+  'https://images.unsplash.com/photo-1502781252888-9143ba7f074e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=3840&q=95',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=3840&q=95',
+  'https://images.unsplash.com/photo-1478358161113-b0e11994a36b?w=3840&q=95',
+  'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=3840&q=95',
+  'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=3840&q=95',
+  'https://images.unsplash.com/photo-1480497490787-505ec076689f?w=3840&q=95',
+  'https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=3840&q=95',
+  'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=3840&q=95',
+  'https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?w=3840&q=95',
+  'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=3840&q=95',
+  'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=3840&q=95',
+  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=3840&q=95',
+  'https://images.unsplash.com/photo-1445905595283-21f8ae8a33d2?w=3840&q=95',
+  'https://images.unsplash.com/photo-1470071131384-0be1f11d3e1a?w=3840&q=95'
+];
+
+let currentBgIndex = 0;
+let activeBgElement = 1;
+
+function rotateBackground(){
+  currentBgIndex = (currentBgIndex + 1) % bgImages.length;
+  const nextBg = activeBgElement === 1 ? document.getElementById('bg2') : document.getElementById('bg1');
+  const currentBg = activeBgElement === 1 ? document.getElementById('bg1') : document.getElementById('bg2');
+  
+  nextBg.style.backgroundImage = `url('${bgImages[currentBgIndex]}')`;
+  nextBg.classList.add('active');
+  
+  setTimeout(() => {
+    currentBg.classList.remove('active');
+  }, 100);
+  
+  activeBgElement = activeBgElement === 1 ? 2 : 1;
+}
+
+// Initialize first background
+document.getElementById('bg1').style.backgroundImage = `url('${bgImages[0]}')`;
+document.getElementById('bg1').classList.add('active');
+
+console.log('Background system initialized with image:', bgImages[0]);
+
+// Rotation control
+let rotationEnabled = true;
+let rotationTimer = null;
+
+// Rotate every 60-120 seconds
+function scheduleNextRotation(){
+  if(!rotationEnabled) return;
+  const delay = (60 + Math.random() * 60) * 1000; // 60-120 seconds
+  console.log(`Next background change in ${Math.round(delay/1000)} seconds`);
+  rotationTimer = setTimeout(() => {
+    rotateBackground();
+    scheduleNextRotation();
+  }, delay);
+}
+scheduleNextRotation();
+
+// Manual wallpaper change button
+document.getElementById('themeToggle').addEventListener('click', rotateBackground);
+
+// Toggle rotation button
+document.getElementById('rotationToggle').addEventListener('click', function(){
+  rotationEnabled = !rotationEnabled;
+  this.classList.toggle('active', rotationEnabled);
+  this.textContent = rotationEnabled ? 'Auto Rotate' : 'Rotation Off';
+  
+  if(rotationEnabled){
+    scheduleNextRotation();
+  } else {
+    if(rotationTimer){
+      clearTimeout(rotationTimer);
+      rotationTimer = null;
+    }
+  }
+  console.log('Background rotation:', rotationEnabled ? 'enabled' : 'disabled');
+});
+
+/* SCREEN BURN-IN PREVENTION - Subtle widget movement every 60 seconds */
+let currentOffset = {x: 0, y: 0};
+const maxOffset = 30; // Maximum pixels to move in any direction
+
+function preventBurnIn(){
+  // Generate random small offsets
+  const xOffset = Math.floor(Math.random() * maxOffset * 2) - maxOffset;
+  const yOffset = Math.floor(Math.random() * maxOffset * 2) - maxOffset;
+  
+  currentOffset.x = xOffset;
+  currentOffset.y = yOffset;
+  
+  const wrap = document.querySelector('.wrap');
+  wrap.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+  
+  console.log(`Screen burn prevention: moved widgets by (${xOffset}px, ${yOffset}px)`);
+}
+
+// Run every 60 seconds
+setInterval(preventBurnIn, 60000);
+
+/* CLOCK */
+function pad(n){return String(n).padStart(2,'0');}
+function updateClock(){
+  const now = new Date();
+  let h = now.getHours();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  const m = pad(now.getMinutes());
+  document.getElementById('time').textContent = `${h}:${m} ${ampm}`;
+  document.getElementById('date').textContent = now.toLocaleString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+}
+updateClock();
+setInterval(updateClock,1000);
+
+/* WEATHER - using Open-Meteo (no API key)
+   Docs: https://open-meteo.com/
+   Current weather endpoint: /v1/forecast?latitude=&longitude=&current_weather=true&timezone=auto
+   Geocoding endpoint: https://geocoding-api.open-meteo.com/v1/search?name=City
+*/
+const state = {
+  lat: null, lon: null, name: null,
+  updateIntervalMs: 5*60*1000
+};
+
+const weatherCodeMap = {
+  0: ['Clear','☀️'],
+  1: ['Mainly clear','🌤️'],
+  2: ['Partly cloudy','⛅'],
+  3: ['Overcast','☁️'],
+  45: ['Fog','🌫️'], 48:['Depositing rime fog','🌫️'],
+  51:['Light drizzle','🌦️'],52:['Moderate drizzle','🌦️'],53:['Dense drizzle','🌦️'],
+  56:['Freezing drizzle','🌧️'],57:['Dense freezing drizzle','🌧️'],
+  61:['Slight rain','🌧️'],63:['Moderate rain','🌧️'],65:['Heavy rain','🌧️'],
+  66:['Freezing rain','🌧️'],67:['Heavy freezing rain','🌧️'],
+  71:['Slight snow','❄️'],73:['Moderate snow','❄️'],75:['Heavy snow','❄️'],
+  77:['Snow grains','❄️'],
+  80:['Slight rain showers','🌦️'],81:['Moderate rain showers','🌦️'],82:['Violent rain showers','⛈️'],
+  85:['Slight snow showers','🌨️'],86:['Heavy snow showers','🌨️'],
+  95:['Thunderstorm','⛈️'],96:['Thunderstorm w/ slight hail','⛈️'],99:['Severe thunderstorm','⛈️']
+};
+
+function showError(msg){
+  const e = document.getElementById('error');
+  e.textContent = msg || '';
+  if(msg) setTimeout(()=>{ e.textContent=''; }, 8000);
+}
+
+async function fetchWeather(lat, lon){
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`;
+    const r = await fetch(url, {cache: "no-store"});
+    if(!r.ok) throw new Error('Weather fetch failed');
+    const data = await r.json();
+    return data;
+  }catch(err){
+    console.error(err);
+    showError('Unable to fetch weather.');
+    return null;
+  }
+}
+
+function displayWeather(name, lat, lon, data){
+  if(!data || !data.current_weather){ showError('No weather data'); return; }
+  const cw = data.current_weather;
+  const temp = Math.round(cw.temperature);
+  const wc = cw.weathercode;
+  const map = weatherCodeMap[wc] || ['Unknown','🌡️'];
+  const desc = map[0];
+  document.getElementById('location').textContent = name || `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+  document.getElementById('temp').innerHTML = `${temp}<span class="temp-unit">°</span>`;
+  document.getElementById('description').textContent = desc + (cw.is_day === 0 ? ' (night)' : '');
+  document.getElementById('lastUpdated').textContent = new Date().toLocaleString('en-US', { hour:'numeric', minute:'2-digit', weekday:'short', day:'numeric', month:'short' });
+  
+  // Display 7-day forecast
+  if(data.daily && data.daily.time){
+    const forecastHTML = data.daily.time.map((date, i) => {
+      const d = new Date(date);
+      const dayName = i === 0 ? 'Today' : d.toLocaleDateString('en-US', {weekday: 'short'});
+      const wcode = data.daily.weathercode[i];
+      const wmap = weatherCodeMap[wcode] || ['Unknown','🌡️'];
+      const high = Math.round(data.daily.temperature_2m_max[i]);
+      const low = Math.round(data.daily.temperature_2m_min[i]);
+      return `
+        <div class="forecast-day">
+          <div class="forecast-day-name">${dayName}</div>
+          <div class="forecast-icon">${wmap[1]}</div>
+          <div class="forecast-temp">${high}° / ${low}°</div>
+        </div>
+      `;
+    }).join('');
+    document.getElementById('forecast').innerHTML = `<div class="forecast-grid">${forecastHTML}</div>`;
+  }
+}
+
+async function doWeatherUpdate(){
+  if(!state.lat || !state.lon) return;
+  document.getElementById('lastUpdated').textContent = 'Updating…';
+  const data = await fetchWeather(state.lat, state.lon);
+  if(data) displayWeather(state.name, state.lat, state.lon, data);
+}
+
+async function geocodeCity(name){
+  try{
+    const q = encodeURIComponent(name);
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${q}&count=5&language=en&format=json`;
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error('Geocode failed');
+    const d = await r.json();
+    if(!d.results || d.results.length===0) {
+      showError('No location found for that name.');
+      return null;
+    }
+    // pick first result
+    const res = d.results[0];
+    return {lat:res.latitude, lon:res.longitude, name: `${res.name}${res.admin1 ? ', '+res.admin1 : ''}${res.country ? ', '+res.country : ''}`};
+  }catch(e){
+    console.error(e);
+    showError('Geocoding failed.');
+    return null;
+  }
+}
+
+/* Location locked to Santa Rosa Beach, Florida */
+async function initLocationAndWeather(){
+  // Fixed coordinates for Santa Rosa Beach, FL
+  state.lat = 30.3938;
+  state.lon = -86.2683;
+  state.name = 'Santa Rosa Beach, FL';
+  document.getElementById('location').textContent = 'Santa Rosa Beach, FL';
+  await doWeatherUpdate();
+}
+
+/* Hook up search */
+document.getElementById('searchBtn').addEventListener('click', async ()=>{
+  const val = document.getElementById('search').value.trim();
+  if(!val) { showError('Type a city name first'); return; }
+  const res = await geocodeCity(val);
+  if(res){
+    state.lat = res.lat; state.lon = res.lon; state.name = res.name;
+    await doWeatherUpdate();
+  }
+});
+document.getElementById('search').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('searchBtn').click(); });
+
+/* Start */
+initLocationAndWeather();
+setInterval(doWeatherUpdate, state.updateIntervalMs);
+
+// Accessibility: announce updates
+const liveEl = document.getElementById('lastUpdated');
+const observer = new MutationObserver(()=> {
+  // whisper update to screen readers
+  liveEl.setAttribute('aria-live','polite');
+});
+observer.observe(liveEl, {childList:true, subtree:true});
+
+</script>
+</body>
+</html>
