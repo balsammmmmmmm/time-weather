@@ -27,7 +27,7 @@
     --glass: rgba(255,255,255,0.5);
     --text:#ffffff;
   }
-  html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;}
+  html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;overflow:hidden;}
   body{
     background: linear-gradient(180deg,#e8f0f7 0%, #f5f9fc 100%);
     color: var(--text);
@@ -36,6 +36,8 @@
     justify-content:center;
     position:relative;
     overflow:hidden;
+    padding:0;
+    padding-bottom:env(safe-area-inset-bottom);
   }
   .bg-image{
     position:fixed;
