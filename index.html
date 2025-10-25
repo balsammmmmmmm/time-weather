@@ -19,14 +19,8 @@
 <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNsb2NrICYgV2VhdGhlciIsCiAgInNob3J0X25hbWUiOiAiQ2xvY2siLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2U4ZjBmNyIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2ZjMiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJz48cmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5MicgZmlsbD0nJTIzMjE5NmYzJy8+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGRvbWluYW50LWJhc2VsaW5lPSdtaWRkbGUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtc2l6ZT0nMTAwJyBmaWxsPSd3aGl0ZSc+4o6wPC90ZXh0Pjwvc3ZnPiIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyUyMzIxOTZmMycvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nbWlkZGxlJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LXNpemU9JzI4MCcgZmlsbD0nd2hpdGUnPuKOsDwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9" />
 
 <style>
-  :root{
-    --bg:#f0f4f8;
-    --card:#ffffff;
-    --muted:#e8eef5;
-    --accent:#2196f3;
-    --glass: rgba(255,255,255,0.5);
-    --text:#ffffff;
-  }
+  *{box-sizing:border-box;}
+  
   html,body{
     height:100%;
     min-height:100vh;
@@ -38,19 +32,20 @@
     position:fixed;
     width:100%;
   }
+  
   body{
     background: linear-gradient(180deg,#e8f0f7 0%, #f5f9fc 100%);
-    color: var(--text);
+    color: #ffffff;
     display:flex;
     align-items:center;
     justify-content:center;
     position:fixed;
-    overflow:hidden;
     top:0;
     left:0;
     right:0;
     bottom:0;
   }
+  
   .bg-image{
     position:fixed;
     top:0;
@@ -70,295 +65,312 @@
     min-height:-webkit-fill-available;
   }
   .bg-image.active{opacity:1;}
-  .wrap{position:relative;z-index:1;}
-  .wrap{
+  
+  .container{
+    position:relative;
+    z-index:1;
     width:100%;
     max-width:1400px;
-    margin:24px;
+    padding:24px;
     display:flex;
     flex-direction:column;
     gap:30px;
     align-items:center;
-    transition: transform 0.8s ease-in-out;
   }
-  .main-row{
+  
+  .main-content{
     display:flex;
     flex-direction:row;
-    gap:60px;
+    gap:0;
     align-items:center;
     justify-content:center;
-    width:100%;
     flex-wrap:nowrap;
-  }
-
-  /* responsive */
-  @media (max-width:900px){
-    .wrap{padding-bottom:40px;}
-    .main-row{flex-wrap:wrap;gap:30px;}
-  }
-  
-  /* iPhone landscape optimization */
-  @media (max-width: 926px) and (orientation: landscape) {
-    .wrap{
-      gap:30px;
-      margin:16px;
-      max-width:100%;
-    }
-    .clockCard{padding:20px;}
-    .weatherCard{padding:20px;}
-    .time{font-size: clamp(60px, 10vw, 100px);}
-    .temp{font-size: clamp(80px, 12vw, 120px);}
+    background:rgba(0,0,0,0.25);
+    border-radius:24px;
+    padding:40px 50px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    backdrop-filter:blur(15px);
+    border: 1px solid rgba(255,255,255,0.15);
   }
   
-  /* iPad landscape optimization */
-  @media (min-width: 927px) and (max-width: 1366px) and (orientation: landscape) {
-    .wrap{
-      max-width:1200px;
-    }
-  }
-
-  .clockCard{
-    background: transparent;
-    border-radius:18px;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    box-shadow: none;
-    min-height:auto;
-    backdrop-filter: none;
-    border: none;
+  .clock{
     text-align:center;
+    padding-right:50px;
+    border-right:1px solid rgba(255,255,255,0.2);
   }
-
+  
+  .weather-container{
+    padding-left:50px;
+    display:flex;
+    gap:40px;
+    align-items:center;
+  }
+  
   .time{
     font-weight:300;
-    font-size: clamp(60px, 12vw, 120px);
+    font-size:120px;
     line-height:0.9;
-    letter-spacing: -3px;
+    letter-spacing:-3px;
     text-shadow: 0 4px 30px rgba(0,0,0,0.2);
-    color: #ffffff;
+    color:#ffffff;
   }
-  .time .ampm{
+  
+  .ampm{
     font-size:0.4em;
     font-weight:300;
     margin-left:8px;
   }
+  
   .date{
     margin-top:8px;
-    color: rgba(255,255,255,0.95);
+    color:rgba(255,255,255,0.95);
     font-size:1.8rem;
     text-shadow: 0 2px 15px rgba(0,0,0,0.2);
     font-weight:300;
   }
-  .theme-toggle{
-    position:fixed;
-    top:20px;
-    right:20px;
-    z-index:999;
-    background:rgba(255,255,255,0.3);
-    border:1px solid rgba(255,255,255,0.3);
-    backdrop-filter:blur(10px);
-    padding:12px;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:1.1rem;
-    transition:transform 0.2s;
-    color:#ffffff;
-    font-weight:300;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    width:44px;
-    height:44px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .theme-toggle:hover{transform:scale(1.05);}
   
-  .rotation-toggle{
-    position:fixed;
-    top:20px;
-    right:75px;
-    z-index:999;
-    background:rgba(255,255,255,0.3);
-    border:1px solid rgba(255,255,255,0.3);
-    backdrop-filter:blur(10px);
-    padding:8px 14px;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:0.85rem;
-    transition:all 0.2s;
-    color:#ffffff;
-    font-weight:300;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  .weather{
     display:flex;
-    align-items:center;
-    justify-content:center;
-    white-space:nowrap;
-  }
-  .rotation-toggle:hover{transform:scale(1.05);}
-  .rotation-toggle.active{
-    background:rgba(33,150,243,0.4);
-    border:1px solid rgba(33,150,243,0.5);
-  }
-
-  .weatherCard{
-    background: rgba(255,255,255,0.25);
-    border-radius:24px;
-    padding:40px 50px;
-    display:flex;
-    flex-direction:row;
     gap:40px;
     align-items:center;
-    justify-content:center;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.1);
-    min-height:auto;
-    backdrop-filter: none;
-    border: 1px solid rgba(255,255,255,0.3);
-    max-width:600px;
   }
-  .weather-left{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:5px;
-  }
-  .weather-right{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:8px;
-  }
-  .forecast-container{
-    width:100%;
-    max-width:1200px;
-    margin-top:0px;
-  }
-  .loc{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    width:100%;
-    justify-content:flex-start;
-  }
-  .loc h2{margin:0;font-size:1.8rem;color:#ffffff;font-weight:300;}
-  .temp{
-    font-size: clamp(90px, 15vw, 160px);
+  
+  .temp-display{
+    font-size:160px;
     font-weight:200;
     color:#ffffff;
     line-height:0.9;
     letter-spacing:-3px;
   }
+  
   .temp-unit{
     font-size:0.4em;
     font-weight:300;
     vertical-align:top;
   }
-  .desc{color:rgba(255,255,255,0.9);font-size:1.2rem;font-weight:300;}
-  .meta{display:none;}
-  .small{font-size:0.88rem;color:var(--muted)}
-  .controls{display:none;}
-  input[type="text"]{
-    background:var(--glass);
-    border:1px solid rgba(255,255,255,0.03);
-    color:inherit;
-    padding:8px 12px;border-radius:10px;
-    width:100%;max-width:240px;font-size:1rem;
-    outline:none;
+  
+  .weather-info h2{
+    margin:0 0 5px 0;
+    font-size:1.8rem;
+    color:#ffffff;
+    font-weight:300;
   }
-  button{
-    background: linear-gradient(180deg,#2196f3, #1976d2);
-    border:none;padding:9px 12px;border-radius:10px;color:#ffffff;font-weight:700;
-    cursor:pointer;
-    box-shadow: 0 6px 18px rgba(33,150,243,0.3);
+  
+  .weather-desc{
+    color:rgba(255,255,255,0.9);
+    font-size:1.2rem;
+    font-weight:300;
+    margin:8px 0;
   }
-  footer{margin-top:8px;color:var(--muted);font-size:0.78rem;text-align:center}
-  .loading{opacity:0.9;font-size:0.95rem;color:rgba(255,255,255,0.8);font-weight:300;}
+  
+  .weather-updated{
+    opacity:0.9;
+    font-size:0.95rem;
+    color:rgba(255,255,255,0.8);
+    font-weight:300;
+  }
+  
+  .forecast{
+    width:100%;
+    max-width:1200px;
+  }
+  
   .forecast-grid{
     display:grid;
     grid-template-columns:repeat(7,1fr);
     gap:12px;
-    width:100%;
   }
+  
   .forecast-day{
-    background:rgba(255,255,255,0.25);
+    background:rgba(0,0,0,0.25);
     border-radius:16px;
     padding:16px 12px;
     text-align:center;
-    font-size:0.95rem;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter:blur(10px);
   }
+  
   .forecast-day-name{
     font-weight:400;
     margin-bottom:8px;
     color:#ffffff;
     font-size:1rem;
   }
-  .forecast-icon{font-size:28px;margin:8px 0}
+  
+  .forecast-icon{
+    font-size:28px;
+    margin:8px 0;
+  }
+  
   .forecast-temp{
     color:rgba(255,255,255,0.9);
     font-size:0.9rem;
     font-weight:300;
   }
+  
+  .btn-reset{
+    position:fixed;
+    top:20px;
+    right:20px;
+    z-index:999;
+    background:rgba(0,0,0,0.3);
+    border:1px solid rgba(255,255,255,0.2);
+    backdrop-filter:blur(10px);
+    padding:12px;
+    border-radius:12px;
+    cursor:pointer;
+    color:#ffffff;
+    font-weight:300;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition:transform 0.2s;
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.1rem;
+  }
+  
+  .btn-reset:hover{
+    transform:scale(1.05);
+  }
+  
+  /* Mobile Portrait (≤926px) */
+  body.mobile-portrait .main-content{
+    flex-direction:row;
+    gap:0;
+    padding:30px 35px;
+  }
+  
+  body.mobile-portrait .clock{
+    padding-right:30px;
+  }
+  
+  body.mobile-portrait .weather-container{
+    padding-left:30px;
+    gap:25px;
+  }
+  
+  body.mobile-portrait .time{
+    font-size:55px;
+    letter-spacing:-2px;
+  }
+  
+  body.mobile-portrait .date{
+    font-size:1.2rem;
+  }
+  
+  body.mobile-portrait .temp-display{
+    font-size:75px;
+    letter-spacing:-2px;
+  }
+  
+  body.mobile-portrait .weather{
+    gap:20px;
+  }
+  
+  body.mobile-portrait .weather-info h2{
+    font-size:1.3rem;
+  }
+  
+  body.mobile-portrait .weather-desc{
+    font-size:0.95rem;
+  }
+  
+  body.mobile-portrait .weather-updated{
+    font-size:0.8rem;
+  }
+  
+  /* iPhone Landscape (≤926px landscape) */
+  body.mobile-landscape .forecast{
+    display:none;
+  }
+  
+  body.mobile-landscape .main-content{
+    gap:0;
+    padding:25px 35px;
+  }
+  
+  body.mobile-landscape .clock{
+    padding-right:30px;
+  }
+  
+  body.mobile-landscape .weather-container{
+    padding-left:30px;
+    gap:25px;
+  }
+  
+  body.mobile-landscape .time{
+    font-size:60px;
+  }
+  
+  body.mobile-landscape .date{
+    font-size:1.2rem;
+  }
+  
+  body.mobile-landscape .temp-display{
+    font-size:70px;
+  }
+  
+  body.mobile-landscape .weather{
+    gap:25px;
+  }
+  
+  body.mobile-landscape .btn-reset{
+    top:10px;
+    right:10px;
+    width:36px;
+    height:36px;
+    font-size:1rem;
+  }
+  
+  /* Tablet/Desktop adjustments */
   @media (max-width:900px){
-    .forecast-grid{grid-template-columns:repeat(4,1fr)}
-    .forecast-day:nth-child(n+5){display:none}
+    .forecast-grid{
+      grid-template-columns:repeat(4,1fr);
+    }
+    .forecast-day:nth-child(n+5){
+      display:none;
+    }
   }
 </style>
 </head>
 <body>
-  <button class="theme-toggle" id="themeToggle" aria-label="Change wallpaper">⟳</button>
-  <button class="rotation-toggle active" id="rotationToggle" aria-label="Toggle rotation">Auto Rotate</button>
+  <button class="btn-reset" id="btnReset" aria-label="Change wallpaper">⟳</button>
   
   <div class="bg-image" id="bg1"></div>
   <div class="bg-image" id="bg2"></div>
   
-  <div class="wrap" role="main">
-    <div class="main-row">
-      <div class="clockCard" aria-live="polite">
+  <div class="container">
+    <div class="main-content">
+      <div class="clock">
         <div class="time" id="time">--:--</div>
-        <div class="date" id="date">Loading date…</div>
+        <div class="date" id="date">Loading...</div>
       </div>
 
-      <div class="weatherCard" aria-live="polite">
-        <div class="weather-left">
-          <div class="temp" id="temp">--<span class="temp-unit">°</span></div>
-        </div>
-        
-        <div class="weather-right">
-          <div class="loc">
-            <h2 id="location">Detecting...</h2>
+      <div class="weather-container">
+        <div class="weather">
+          <div class="temp-display" id="temp">--<span class="temp-unit">°</span></div>
+          
+          <div class="weather-info">
+            <h2 id="location">Santa Rosa Beach, FL</h2>
+            <div class="weather-updated" id="updated">--</div>
+            <div class="weather-desc" id="desc">—</div>
           </div>
-          <div class="loading" id="lastUpdated">--</div>
-          <div class="desc" id="description">—</div>
         </div>
-
-        <div class="meta" id="meta">
-          <div id="feels">Feels: --°</div>
-          <div id="wind">Wind: --</div>
-          <div id="humidity">Humidity: --</div>
-        </div>
-
-        <div class="controls">
-          <input id="search" placeholder="Search city (fallback) — e.g., Miami" aria-label="Search city name" />
-          <button id="searchBtn">Search</button>
-        </div>
-        <div class="small" id="error" role="status" style="color:#ffb4b4"></div>
       </div>
     </div>
 
-    <div id="forecast" class="forecast-container"></div>
+    <div class="forecast" id="forecast"></div>
   </div>
 
 <script>
-/* BACKGROUND IMAGE ROTATION */
+// Background images
 const bgImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=3840&q=95',
   'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=3840&q=95',
   'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=3840&q=95',
   'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=3840&q=95',
-  'https://images.unsplash.com/photo-1534270804882-64b7be39d5f3?w=3840&q=95',
   'https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?w=3840&q=95',
   'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=3840&q=95',
   'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=3840&q=95',
@@ -368,8 +380,6 @@ const bgImages = [
   'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=3840&q=95',
   'https://images.unsplash.com/photo-1491466424936-e304919aada7?w=3840&q=95',
   'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1545289414-1c3cb1c06238?w=3840&q=95',
-  'https://images.unsplash.com/photo-1485082669661-e6e2e4e6b1e4?w=3840&q=95',
   'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=3840&q=95',
   'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=3840&q=95',
   'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=3840&q=95',
@@ -452,7 +462,9 @@ const bgImages = [
 
 let currentBgIndex = 0;
 let activeBgElement = 1;
+let rotationTimer = null;
 
+// Background rotation
 function rotateBackground(){
   currentBgIndex = (currentBgIndex + 1) % bgImages.length;
   const nextBg = activeBgElement === 1 ? document.getElementById('bg2') : document.getElementById('bg1');
@@ -461,150 +473,91 @@ function rotateBackground(){
   nextBg.style.backgroundImage = `url('${bgImages[currentBgIndex]}')`;
   nextBg.classList.add('active');
   
-  setTimeout(() => {
-    currentBg.classList.remove('active');
-  }, 100);
-  
+  setTimeout(() => currentBg.classList.remove('active'), 100);
   activeBgElement = activeBgElement === 1 ? 2 : 1;
 }
 
-// Initialize first background
-document.getElementById('bg1').style.backgroundImage = `url('${bgImages[0]}')`;
-document.getElementById('bg1').classList.add('active');
-
-console.log('Background system initialized with image:', bgImages[0]);
-
-// Rotation control
-let rotationEnabled = true;
-let rotationTimer = null;
-
-// Rotate every 60-120 seconds
 function scheduleNextRotation(){
-  if(!rotationEnabled) return;
-  const delay = (60 + Math.random() * 60) * 1000; // 60-120 seconds
-  console.log(`Next background change in ${Math.round(delay/1000)} seconds`);
+  const delay = (60 + Math.random() * 60) * 1000;
   rotationTimer = setTimeout(() => {
     rotateBackground();
     scheduleNextRotation();
   }, delay);
 }
+
+// Initialize background
+document.getElementById('bg1').style.backgroundImage = `url('${bgImages[0]}')`;
+document.getElementById('bg1').classList.add('active');
 scheduleNextRotation();
 
-// Manual wallpaper change button
-document.getElementById('themeToggle').addEventListener('click', rotateBackground);
+// Button handler
+document.getElementById('btnReset').addEventListener('click', rotateBackground);
 
-// Toggle rotation button
-document.getElementById('rotationToggle').addEventListener('click', function(){
-  rotationEnabled = !rotationEnabled;
-  this.classList.toggle('active', rotationEnabled);
-  this.textContent = rotationEnabled ? 'Auto Rotate' : 'Rotation Off';
-  
-  if(rotationEnabled){
-    scheduleNextRotation();
-  } else {
-    if(rotationTimer){
-      clearTimeout(rotationTimer);
-      rotationTimer = null;
-    }
-  }
-  console.log('Background rotation:', rotationEnabled ? 'enabled' : 'disabled');
-});
-
-/* SCREEN BURN-IN PREVENTION - Subtle widget movement every 60 seconds */
-let currentOffset = {x: 0, y: 0};
-const maxOffset = 30; // Maximum pixels to move in any direction
-
-function preventBurnIn(){
-  // Generate random small offsets
-  const xOffset = Math.floor(Math.random() * maxOffset * 2) - maxOffset;
-  const yOffset = Math.floor(Math.random() * maxOffset * 2) - maxOffset;
-  
-  currentOffset.x = xOffset;
-  currentOffset.y = yOffset;
-  
-  const wrap = document.querySelector('.wrap');
-  wrap.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-  
-  console.log(`Screen burn prevention: moved widgets by (${xOffset}px, ${yOffset}px)`);
-}
-
-// Run every 60 seconds
-setInterval(preventBurnIn, 60000);
-
-/* CLOCK */
-function pad(n){return String(n).padStart(2,'0');}
+// Clock
 function updateClock(){
   const now = new Date();
   let h = now.getHours();
   const ampm = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
-  const m = pad(now.getMinutes());
+  const m = String(now.getMinutes()).padStart(2,'0');
   document.getElementById('time').innerHTML = `${h}:${m} <span class="ampm">${ampm}</span>`;
-  document.getElementById('date').textContent = now.toLocaleString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('date').textContent = now.toLocaleString('en-US', { 
+    weekday:'long', 
+    month:'long', 
+    day:'numeric', 
+    year:'numeric' 
+  });
 }
 updateClock();
-setInterval(updateClock,1000);
+setInterval(updateClock, 1000);
 
-/* WEATHER - using Open-Meteo (no API key)
-   Docs: https://open-meteo.com/
-   Current weather endpoint: /v1/forecast?latitude=&longitude=&current_weather=true&timezone=auto
-   Geocoding endpoint: https://geocoding-api.open-meteo.com/v1/search?name=City
-*/
-const state = {
-  lat: null, lon: null, name: null,
-  updateIntervalMs: 5*60*1000
-};
-
+// Weather
 const weatherCodeMap = {
-  0: ['Clear','☀️'],
-  1: ['Mainly clear','🌤️'],
-  2: ['Partly cloudy','⛅'],
-  3: ['Overcast','☁️'],
+  0: ['Clear','☀️'], 1: ['Mainly clear','🌤️'], 2: ['Partly cloudy','⛅'], 3: ['Overcast','☁️'],
   45: ['Fog','🌫️'], 48:['Depositing rime fog','🌫️'],
-  51:['Light drizzle','🌦️'],52:['Moderate drizzle','🌦️'],53:['Dense drizzle','🌦️'],
-  56:['Freezing drizzle','🌧️'],57:['Dense freezing drizzle','🌧️'],
-  61:['Slight rain','🌧️'],63:['Moderate rain','🌧️'],65:['Heavy rain','🌧️'],
-  66:['Freezing rain','🌧️'],67:['Heavy freezing rain','🌧️'],
-  71:['Slight snow','❄️'],73:['Moderate snow','❄️'],75:['Heavy snow','❄️'],
-  77:['Snow grains','❄️'],
-  80:['Slight rain showers','🌦️'],81:['Moderate rain showers','🌦️'],82:['Violent rain showers','⛈️'],
-  85:['Slight snow showers','🌨️'],86:['Heavy snow showers','🌨️'],
-  95:['Thunderstorm','⛈️'],96:['Thunderstorm w/ slight hail','⛈️'],99:['Severe thunderstorm','⛈️']
+  51:['Light drizzle','🌦️'], 52:['Moderate drizzle','🌦️'], 53:['Dense drizzle','🌦️'],
+  56:['Freezing drizzle','🌧️'], 57:['Dense freezing drizzle','🌧️'],
+  61:['Slight rain','🌧️'], 63:['Moderate rain','🌧️'], 65:['Heavy rain','🌧️'],
+  66:['Freezing rain','🌧️'], 67:['Heavy freezing rain','🌧️'],
+  71:['Slight snow','❄️'], 73:['Moderate snow','❄️'], 75:['Heavy snow','❄️'], 77:['Snow grains','❄️'],
+  80:['Slight rain showers','🌦️'], 81:['Moderate rain showers','🌦️'], 82:['Violent rain showers','⛈️'],
+  85:['Slight snow showers','🌨️'], 86:['Heavy snow showers','🌨️'],
+  95:['Thunderstorm','⛈️'], 96:['Thunderstorm w/ slight hail','⛈️'], 99:['Severe thunderstorm','⛈️']
 };
 
-function showError(msg){
-  const e = document.getElementById('error');
-  e.textContent = msg || '';
-  if(msg) setTimeout(()=>{ e.textContent=''; }, 8000);
-}
-
-async function fetchWeather(lat, lon){
+async function fetchWeather(){
   try{
+    const lat = 30.3938;
+    const lon = -86.2683;
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`;
     const r = await fetch(url, {cache: "no-store"});
     if(!r.ok) throw new Error('Weather fetch failed');
-    const data = await r.json();
-    return data;
+    return await r.json();
   }catch(err){
-    console.error(err);
-    showError('Unable to fetch weather.');
+    console.error('Weather error:', err);
     return null;
   }
 }
 
-function displayWeather(name, lat, lon, data){
-  if(!data || !data.current_weather){ showError('No weather data'); return; }
+function displayWeather(data){
+  if(!data || !data.current_weather) return;
+  
   const cw = data.current_weather;
   const temp = Math.round(cw.temperature);
   const wc = cw.weathercode;
   const map = weatherCodeMap[wc] || ['Unknown','🌡️'];
-  const desc = map[0];
-  document.getElementById('location').textContent = name || `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
-  document.getElementById('temp').innerHTML = `${temp}<span class="temp-unit">°</span>`;
-  document.getElementById('description').textContent = desc + (cw.is_day === 0 ? ' (night)' : '');
-  document.getElementById('lastUpdated').textContent = new Date().toLocaleString('en-US', { hour:'numeric', minute:'2-digit', weekday:'short', day:'numeric', month:'short' });
   
-  // Display 7-day forecast
+  document.getElementById('temp').innerHTML = `${temp}<span class="temp-unit">°</span>`;
+  document.getElementById('desc').textContent = map[0] + (cw.is_day === 0 ? ' (night)' : '');
+  document.getElementById('updated').textContent = new Date().toLocaleString('en-US', { 
+    hour:'numeric', 
+    minute:'2-digit', 
+    weekday:'short', 
+    day:'numeric', 
+    month:'short' 
+  });
+  
+  // 7-day forecast
   if(data.daily && data.daily.time){
     const forecastHTML = data.daily.time.map((date, i) => {
       const d = new Date(date);
@@ -625,68 +578,33 @@ function displayWeather(name, lat, lon, data){
   }
 }
 
-async function doWeatherUpdate(){
-  if(!state.lat || !state.lon) return;
-  document.getElementById('lastUpdated').textContent = 'Updating…';
-  const data = await fetchWeather(state.lat, state.lon);
-  if(data) displayWeather(state.name, state.lat, state.lon, data);
+async function updateWeather(){
+  const data = await fetchWeather();
+  if(data) displayWeather(data);
 }
 
-async function geocodeCity(name){
-  try{
-    const q = encodeURIComponent(name);
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${q}&count=5&language=en&format=json`;
-    const r = await fetch(url, {cache:'no-store'});
-    if(!r.ok) throw new Error('Geocode failed');
-    const d = await r.json();
-    if(!d.results || d.results.length===0) {
-      showError('No location found for that name.');
-      return null;
-    }
-    // pick first result
-    const res = d.results[0];
-    return {lat:res.latitude, lon:res.longitude, name: `${res.name}${res.admin1 ? ', '+res.admin1 : ''}${res.country ? ', '+res.country : ''}`};
-  }catch(e){
-    console.error(e);
-    showError('Geocoding failed.');
-    return null;
+updateWeather();
+setInterval(updateWeather, 5 * 60 * 1000);
+
+// Responsive layout handler
+function handleLayout(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const isLandscape = w > h;
+  const isMobile = w <= 926;
+  
+  document.body.classList.remove('mobile-portrait', 'mobile-landscape');
+  
+  if(isMobile && isLandscape){
+    document.body.classList.add('mobile-landscape');
+  } else if(isMobile && !isLandscape){
+    document.body.classList.add('mobile-portrait');
   }
 }
 
-/* Location locked to Santa Rosa Beach, Florida */
-async function initLocationAndWeather(){
-  // Fixed coordinates for Santa Rosa Beach, FL
-  state.lat = 30.3938;
-  state.lon = -86.2683;
-  state.name = 'Santa Rosa Beach, FL';
-  document.getElementById('location').textContent = 'Santa Rosa Beach, FL';
-  await doWeatherUpdate();
-}
-
-/* Hook up search */
-document.getElementById('searchBtn').addEventListener('click', async ()=>{
-  const val = document.getElementById('search').value.trim();
-  if(!val) { showError('Type a city name first'); return; }
-  const res = await geocodeCity(val);
-  if(res){
-    state.lat = res.lat; state.lon = res.lon; state.name = res.name;
-    await doWeatherUpdate();
-  }
-});
-document.getElementById('search').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('searchBtn').click(); });
-
-/* Start */
-initLocationAndWeather();
-setInterval(doWeatherUpdate, state.updateIntervalMs);
-
-// Accessibility: announce updates
-const liveEl = document.getElementById('lastUpdated');
-const observer = new MutationObserver(()=> {
-  // whisper update to screen readers
-  liveEl.setAttribute('aria-live','polite');
-});
-observer.observe(liveEl, {childList:true, subtree:true});
-
+handleLayout();
+window.addEventListener('resize', handleLayout);
+window.addEventListener('orientationchange', () => setTimeout(handleLayout, 100));
 </script>
 </body>
 </html>
