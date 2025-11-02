@@ -1,610 +1,241 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Clock + Weather Display</title>
-
-<!-- PWA Meta Tags -->
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Clock Weather" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="theme-color" content="#2196f3" />
-
-<!-- Apple Touch Icons -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%232196f3'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white'>⏰</text></svg>" />
-
-<!-- Manifest -->
-<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNsb2NrICYgV2VhdGhlciIsCiAgInNob3J0X25hbWUiOiAiQ2xvY2siLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2U4ZjBmNyIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2ZjMiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJz48cmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5MicgZmlsbD0nJTIzMjE5NmYzJy8+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGRvbWluYW50LWJhc2VsaW5lPSdtaWRkbGUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtc2l6ZT0nMTAwJyBmaWxsPSd3aGl0ZSc+4o6wPC90ZXh0Pjwvc3ZnPiIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyUyMzIxOTZmMycvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nbWlkZGxlJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LXNpemU9JzI4MCcgZmlsbD0nd2hpdGUnPuKOsDwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9" />
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Clock + Weather</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Clock Weather">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2196f3">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%232196f3'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white'>⏰</text></svg>">
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNsb2NrICYgV2VhdGhlciIsCiAgInNob3J0X25hbWUiOiAiQ2xvY2siLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2U4ZjBmNyIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2ZjMiLAogICJpY29ucyI6IFt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDE5MiAxOTInPjxyZWN0IHdpZHRoPScxOTInIGhlaWdodD0nMTkyJyBmaWxsPSclMjMyMTk2ZjMnLz48dGV4dCB4PSc1MCUnIHk9JzUwJScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScxMDAnIGZpbGw9J3doaXRlJz7ijrA8L3RleHQ+PC9zdmc+Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifSx7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDUxMiA1MTInPjxyZWN0IHdpZHRoPSc1MTInIGhlaWdodD0nNTEyJyBmaWxsPSclMjMyMTk2ZjMnLz48dGV4dCB4PSc1MCUnIHk9JzUwJScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyODAnIGZpbGw9J3doaXRlJz7ijrA8L3RleHQ+PC9zdmc+Iiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
-  *{box-sizing:border-box;}
-  
-  html,body{
-    height:100%;
-    min-height:100vh;
-    min-height:-webkit-fill-available;
-    margin:0;
-    padding:0;
-    font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;
-    overflow:hidden;
-    position:fixed;
-    width:100%;
-  }
-  
-  body{
-    background: linear-gradient(180deg,#e8f0f7 0%, #f5f9fc 100%);
-    color: #ffffff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-  }
-  
-  .bg-image{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    opacity:0;
-    transition:opacity 2s ease-in-out;
-    z-index:0;
-    pointer-events:none;
-    height:100%;
-    width:100%;
-    min-height:100vh;
-    min-height:-webkit-fill-available;
-  }
-  .bg-image.active{opacity:1;}
-  
-  .container{
-    position:relative;
-    z-index:1;
-    width:100%;
-    max-width:1400px;
-    padding:24px;
-    display:flex;
-    flex-direction:column;
-    gap:30px;
-    align-items:center;
-  }
-  
-  .main-content{
-    display:flex;
-    flex-direction:row;
-    gap:0;
-    align-items:center;
-    justify-content:center;
-    flex-wrap:nowrap;
-    background:rgba(0,0,0,0.25);
-    border-radius:24px;
-    padding:40px 50px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-    backdrop-filter:blur(15px);
-    border: 1px solid rgba(255,255,255,0.15);
-  }
-  
-  .clock{
-    text-align:center;
-    padding-right:50px;
-    border-right:1px solid rgba(255,255,255,0.2);
-  }
-  
-  .weather-container{
-    padding-left:50px;
-    display:flex;
-    gap:40px;
-    align-items:center;
-  }
-  
-  .time{
-    font-weight:300;
-    font-size:120px;
-    line-height:0.9;
-    letter-spacing:-3px;
-    text-shadow: 0 4px 30px rgba(0,0,0,0.2);
-    color:#ffffff;
-  }
-  
-  .ampm{
-    font-size:0.4em;
-    font-weight:300;
-    margin-left:8px;
-  }
-  
-  .date{
-    margin-top:8px;
-    color:rgba(255,255,255,0.95);
-    font-size:1.8rem;
-    text-shadow: 0 2px 15px rgba(0,0,0,0.2);
-    font-weight:300;
-  }
-  
-  .weather{
-    display:flex;
-    gap:40px;
-    align-items:center;
-  }
-  
-  .temp-display{
-    font-size:160px;
-    font-weight:200;
-    color:#ffffff;
-    line-height:0.9;
-    letter-spacing:-3px;
-  }
-  
-  .temp-unit{
-    font-size:0.4em;
-    font-weight:300;
-    vertical-align:top;
-  }
-  
-  .weather-info h2{
-    margin:0 0 5px 0;
-    font-size:1.8rem;
-    color:#ffffff;
-    font-weight:300;
-  }
-  
-  .weather-desc{
-    color:rgba(255,255,255,0.9);
-    font-size:1.2rem;
-    font-weight:300;
-    margin:8px 0;
-  }
-  
-  .weather-updated{
-    opacity:0.9;
-    font-size:0.95rem;
-    color:rgba(255,255,255,0.8);
-    font-weight:300;
-  }
-  
-  .forecast{
-    width:100%;
-    max-width:1200px;
-  }
-  
-  .forecast-grid{
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    gap:12px;
-  }
-  
-  .forecast-day{
-    background:rgba(0,0,0,0.25);
-    border-radius:16px;
-    padding:16px 12px;
-    text-align:center;
-    border: 1px solid rgba(255,255,255,0.15);
-    backdrop-filter:blur(10px);
-  }
-  
-  .forecast-day-name{
-    font-weight:400;
-    margin-bottom:8px;
-    color:#ffffff;
-    font-size:1rem;
-  }
-  
-  .forecast-icon{
-    font-size:28px;
-    margin:8px 0;
-  }
-  
-  .forecast-temp{
-    color:rgba(255,255,255,0.9);
-    font-size:0.9rem;
-    font-weight:300;
-  }
-  
-  .btn-reset{
-    position:fixed;
-    top:20px;
-    right:20px;
-    z-index:999;
-    background:rgba(0,0,0,0.3);
-    border:1px solid rgba(255,255,255,0.2);
-    backdrop-filter:blur(10px);
-    padding:12px;
-    border-radius:12px;
-    cursor:pointer;
-    color:#ffffff;
-    font-weight:300;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    transition:transform 0.2s;
-    width:44px;
-    height:44px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.1rem;
-  }
-  
-  .btn-reset:hover{
-    transform:scale(1.05);
-  }
-  
-  /* Mobile Portrait (≤926px) */
-  body.mobile-portrait .main-content{
-    flex-direction:row;
-    gap:0;
-    padding:30px 35px;
-  }
-  
-  body.mobile-portrait .clock{
-    padding-right:30px;
-  }
-  
-  body.mobile-portrait .weather-container{
-    padding-left:30px;
-    gap:25px;
-  }
-  
-  body.mobile-portrait .time{
-    font-size:55px;
-    letter-spacing:-2px;
-  }
-  
-  body.mobile-portrait .date{
-    font-size:1.2rem;
-  }
-  
-  body.mobile-portrait .temp-display{
-    font-size:75px;
-    letter-spacing:-2px;
-  }
-  
-  body.mobile-portrait .weather{
-    gap:20px;
-  }
-  
-  body.mobile-portrait .weather-info h2{
-    font-size:1.3rem;
-  }
-  
-  body.mobile-portrait .weather-desc{
-    font-size:0.95rem;
-  }
-  
-  body.mobile-portrait .weather-updated{
-    font-size:0.8rem;
-  }
-  
-  /* iPhone Landscape (≤926px landscape) */
-  body.mobile-landscape .forecast{
-    display:none;
-  }
-  
-  body.mobile-landscape .main-content{
-    gap:0;
-    padding:25px 35px;
-  }
-  
-  body.mobile-landscape .clock{
-    padding-right:30px;
-  }
-  
-  body.mobile-landscape .weather-container{
-    padding-left:30px;
-    gap:25px;
-  }
-  
-  body.mobile-landscape .time{
-    font-size:60px;
-  }
-  
-  body.mobile-landscape .date{
-    font-size:1.2rem;
-  }
-  
-  body.mobile-landscape .temp-display{
-    font-size:70px;
-  }
-  
-  body.mobile-landscape .weather{
-    gap:25px;
-  }
-  
-  body.mobile-landscape .btn-reset{
-    top:10px;
-    right:10px;
-    width:36px;
-    height:36px;
-    font-size:1rem;
-  }
-  
-  /* Tablet/Desktop adjustments */
-  @media (max-width:900px){
-    .forecast-grid{
-      grid-template-columns:repeat(4,1fr);
-    }
-    .forecast-day:nth-child(n+5){
-      display:none;
-    }
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;min-height:100vh;min-height:-webkit-fill-available;font-family:Inter,system-ui,-apple-system,sans-serif;overflow:hidden;position:fixed;width:100%}
+body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;align-items:center;justify-content:center;top:0;left:0;right:0;bottom:0}
+.bg{position:fixed;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s;z-index:0;pointer-events:none}
+.bg.active{opacity:1}
+.wrap{position:relative;z-index:1;width:100%;max-width:1400px;padding:24px;display:flex;flex-direction:column;gap:30px;align-items:center}
+.card{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);border-radius:24px;padding:40px 50px;box-shadow:0 8px 40px rgba(0,0,0,.3);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.15)}
+.clock{text-align:center;padding-right:50px;border-right:1px solid rgba(255,255,255,.2)}
+.time{font-weight:300;font-size:120px;line-height:.9;letter-spacing:-3px;text-shadow:0 4px 30px rgba(0,0,0,.2)}
+.ampm{font-size:.4em;font-weight:300;margin-left:4px}
+.date{margin-top:8px;font-size:1.8rem;text-shadow:0 2px 15px rgba(0,0,0,.2);font-weight:300;opacity:.95}
+.weather{padding-left:50px;display:flex;gap:40px;align-items:center}
+.temp{font-size:160px;font-weight:200;line-height:.9;letter-spacing:-3px}
+.unit{font-size:.4em;font-weight:300;vertical-align:top}
+.info h2{font-size:1.8rem;font-weight:300;margin-bottom:5px}
+.desc{font-size:1.2rem;font-weight:300;margin:8px 0;opacity:.9}
+.updated{font-size:.95rem;font-weight:300;opacity:.8}
+.forecast{width:100%;max-width:1200px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.day{background:rgba(0,0,0,.25);border-radius:16px;padding:16px 12px;text-align:center;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(10px)}
+.day-name{font-weight:400;margin-bottom:8px;font-size:1rem}
+.icon{font-size:28px;margin:8px 0}
+.temps{font-size:.9rem;font-weight:300;opacity:.9}
+.btn{position:fixed;top:20px;right:20px;z-index:999;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:12px;border-radius:12px;cursor:pointer;color:#fff;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.btn:hover{transform:scale(1.05)}
+@media (max-width:926px){
+.mobile-portrait .card{padding:30px 35px}
+.mobile-portrait .clock{padding-right:30px}
+.mobile-portrait .weather{padding-left:30px;gap:25px}
+.mobile-portrait .time{font-size:55px;letter-spacing:-2px}
+.mobile-portrait .date{font-size:1.2rem}
+.mobile-portrait .temp{font-size:75px;letter-spacing:-2px}
+.mobile-portrait .weather{gap:20px}
+.mobile-portrait .info h2{font-size:1.3rem}
+.mobile-portrait .desc{font-size:.95rem}
+.mobile-portrait .updated{font-size:.8rem}
+.mobile-landscape .forecast{display:none}
+.mobile-landscape .card{padding:30px 40px;width:90%;max-width:none}
+.mobile-landscape .clock{padding-right:40px;flex:1}
+.mobile-landscape .weather{padding-left:40px;flex:0 0 auto;flex-direction:column;gap:0}
+.mobile-landscape .time{font-size:clamp(160px,22vw,250px);letter-spacing:-8px}
+.mobile-landscape .ampm{margin-left:-35px}
+.mobile-landscape .date{font-size:clamp(1.8rem,3.5vw,2.8rem);margin-top:20px}
+.mobile-landscape .temp{font-size:clamp(110px,14vw,160px);letter-spacing:-5px}
+.mobile-landscape .info{display:none}
+.mobile-landscape .btn{top:10px;right:10px;width:36px;height:36px;font-size:1rem}
+}
+@media (max-width:900px){
+.grid{grid-template-columns:repeat(4,1fr)}
+.day:nth-child(n+5){display:none}
+}
 </style>
 </head>
 <body>
-  <button class="btn-reset" id="btnReset" aria-label="Change wallpaper">⟳</button>
-  
-  <div class="bg-image" id="bg1"></div>
-  <div class="bg-image" id="bg2"></div>
-  
-  <div class="container">
-    <div class="main-content">
-      <div class="clock">
-        <div class="time" id="time">--:--</div>
-        <div class="date" id="date">Loading...</div>
-      </div>
-
-      <div class="weather-container">
-        <div class="weather">
-          <div class="temp-display" id="temp">--<span class="temp-unit">°</span></div>
-          
-          <div class="weather-info">
-            <h2 id="location">Santa Rosa Beach, FL</h2>
-            <div class="weather-updated" id="updated">--</div>
-            <div class="weather-desc" id="desc">—</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="forecast" id="forecast"></div>
-  </div>
-
+<button class="btn" id="btn" aria-label="Change wallpaper">⟳</button>
+<div class="bg" id="bg1"></div>
+<div class="bg" id="bg2"></div>
+<div class="wrap">
+<div class="card">
+<div class="clock">
+<div class="time" id="time">--:--</div>
+<div class="date" id="date">Loading...</div>
+</div>
+<div class="weather">
+<div class="temp" id="temp">--<span class="unit">°</span></div>
+<div class="info">
+<h2>Santa Rosa Beach, FL</h2>
+<div class="updated" id="updated">--</div>
+<div class="desc" id="desc">—</div>
+</div>
+</div>
+</div>
+<div class="forecast" id="forecast"></div>
+</div>
 <script>
-// Background images
-const bgImages = [
-  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=3840&q=95',
-  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=3840&q=95',
-  'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=3840&q=95',
-  'https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=3840&q=95',
-  'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=3840&q=95',
-  'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=3840&q=95',
-  'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=3840&q=95',
-  'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=3840&q=95',
-  'https://images.unsplash.com/photo-1491466424936-e304919aada7?w=3840&q=95',
-  'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=3840&q=95',
-  'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=3840&q=95',
-  'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=3840&q=95',
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=3840&q=95',
-  'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=3840&q=95',
-  'https://images.unsplash.com/photo-1478358161113-b0e11994a36b?w=3840&q=95',
-  'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=3840&q=95',
-  'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=3840&q=95',
-  'https://images.unsplash.com/photo-1480497490787-505ec076689f?w=3840&q=95',
-  'https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=3840&q=95',
-  'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=3840&q=95',
-  'https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?w=3840&q=95',
-  'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=3840&q=95',
-  'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=3840&q=95',
-  'https://images.unsplash.com/photo-1445905595283-21f8ae8a33d2?w=3840&q=95',
-  'https://images.unsplash.com/photo-1470071131384-0be1f11d3e1a?w=3840&q=95',
-  'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=3840&q=95',
-  'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=3840&q=95',
-  'https://images.unsplash.com/photo-1506260408121-e353d10b87c7?w=3840&q=95',
-  'https://images.unsplash.com/photo-1488034976201-ffbaa99cbf5c?w=3840&q=95',
-  'https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=3840&q=95',
-  'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=3840&q=95',
-  'https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=3840&q=95',
-  'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?w=3840&q=95',
-  'https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=3840&q=95',
-  'https://images.unsplash.com/photo-1444080748397-f442aa95c3e5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=3840&q=95',
-  'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=3840&q=95',
-  'https://images.unsplash.com/photo-1502224562085-639556652f33?w=3840&q=95',
-  'https://images.unsplash.com/photo-1502175353174-a7a70e73b362?w=3840&q=95',
-  'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=3840&q=95',
-  'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=3840&q=95',
-  'https://images.unsplash.com/photo-1428908728789-d2de25dbd4e2?w=3840&q=95',
-  'https://images.unsplash.com/photo-1470043201067-764120126eb4?w=3840&q=95',
-  'https://images.unsplash.com/photo-1484821582734-6c6c9f99a672?w=3840&q=95',
-  'https://images.unsplash.com/photo-1487700160041-babef9c3cb55?w=3840&q=95',
-  'https://images.unsplash.com/photo-1499363145340-41a847a534d1?w=3840&q=95',
-  'https://images.unsplash.com/photo-1501436513145-30f24e19fcc8?w=3840&q=95',
-  'https://images.unsplash.com/photo-1490604001847-b712b0c2f967?w=3840&q=95',
-  'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=3840&q=95',
-  'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe?w=3840&q=95',
-  'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=3840&q=95',
-  'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=3840&q=95',
-  'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=3840&q=95',
-  'https://images.unsplash.com/photo-1465146633011-14f8e0781093?w=3840&q=95',
-  'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=3840&q=95',
-  'https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=3840&q=95',
-  'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=3840&q=95',
-  'https://images.unsplash.com/photo-1492571350019-22de08371fd3?w=3840&q=95',
-  'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=3840&q=95',
-  'https://images.unsplash.com/photo-1540206395-68808572332f?w=3840&q=95',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=3840&q=95',
-  'https://images.unsplash.com/photo-1519505907962-0a6cb0167c73?w=3840&q=95',
-  'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=3840&q=95',
-  'https://images.unsplash.com/photo-1502781252888-9143ba7f074e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=3840&q=95',
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=3840&q=95',
-  'https://images.unsplash.com/photo-1478358161113-b0e11994a36b?w=3840&q=95',
-  'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=3840&q=95',
-  'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=3840&q=95',
-  'https://images.unsplash.com/photo-1480497490787-505ec076689f?w=3840&q=95',
-  'https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=3840&q=95',
-  'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=3840&q=95',
-  'https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?w=3840&q=95',
-  'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=3840&q=95',
-  'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=3840&q=95',
-  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=3840&q=95',
-  'https://images.unsplash.com/photo-1445905595283-21f8ae8a33d2?w=3840&q=95',
-  'https://images.unsplash.com/photo-1470071131384-0be1f11d3e1a?w=3840&q=95'
+const IMGS=[
+'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=3840&q=95',
+'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=3840&q=95',
+'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=3840&q=95',
+'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=3840&q=95',
+'https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?w=3840&q=95',
+'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=3840&q=95',
+'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=3840&q=95',
+'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=3840&q=95',
+'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=3840&q=95',
+'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=3840&q=95',
+'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=3840&q=95',
+'https://images.unsplash.com/photo-1491466424936-e304919aada7?w=3840&q=95',
+'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=3840&q=95',
+'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=3840&q=95',
+'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=3840&q=95',
+'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=3840&q=95',
+'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=3840&q=95',
+'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=3840&q=95',
+'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=3840&q=95',
+'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=3840&q=95',
+'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=3840&q=95',
+'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=3840&q=95',
+'https://images.unsplash.com/photo-1480497490787-505ec076689f?w=3840&q=95',
+'https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=3840&q=95',
+'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=3840&q=95',
+'https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?w=3840&q=95',
+'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=3840&q=95',
+'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=3840&q=95',
+'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=3840&q=95',
+'https://images.unsplash.com/photo-1445905595283-21f8ae8a33d2?w=3840&q=95',
+'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=3840&q=95',
+'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=3840&q=95',
+'https://images.unsplash.com/photo-1506260408121-e353d10b87c7?w=3840&q=95',
+'https://images.unsplash.com/photo-1488034976201-ffbaa99cbf5c?w=3840&q=95',
+'https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=3840&q=95',
+'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=3840&q=95',
+'https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=3840&q=95',
+'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?w=3840&q=95',
+'https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=3840&q=95',
+'https://images.unsplash.com/photo-1444080748397-f442aa95c3e5?w=3840&q=95',
+'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=3840&q=95',
+'https://images.unsplash.com/photo-1502224562085-639556652f33?w=3840&q=95',
+'https://images.unsplash.com/photo-1502175353174-a7a70e73b362?w=3840&q=95',
+'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=3840&q=95',
+'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=3840&q=95',
+'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=3840&q=95',
+'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=3840&q=95',
+'https://images.unsplash.com/photo-1428908728789-d2de25dbd4e2?w=3840&q=95',
+'https://images.unsplash.com/photo-1470043201067-764120126eb4?w=3840&q=95',
+'https://images.unsplash.com/photo-1484821582734-6c6c9f99a672?w=3840&q=95',
+'https://images.unsplash.com/photo-1487700160041-babef9c3cb55?w=3840&q=95',
+'https://images.unsplash.com/photo-1499363145340-41a847a534d1?w=3840&q=95',
+'https://images.unsplash.com/photo-1501436513145-30f24e19fcc8?w=3840&q=95',
+'https://images.unsplash.com/photo-1490604001847-b712b0c2f967?w=3840&q=95',
+'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=3840&q=95',
+'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe?w=3840&q=95',
+'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=3840&q=95',
+'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=3840&q=95',
+'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=3840&q=95',
+'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=3840&q=95',
+'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=3840&q=95',
+'https://images.unsplash.com/photo-1465146633011-14f8e0781093?w=3840&q=95',
+'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=3840&q=95',
+'https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?w=3840&q=95',
+'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=3840&q=95',
+'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=3840&q=95',
+'https://images.unsplash.com/photo-1492571350019-22de08371fd3?w=3840&q=95',
+'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=3840&q=95',
+'https://images.unsplash.com/photo-1540206395-68808572332f?w=3840&q=95',
+'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=3840&q=95',
+'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=3840&q=95',
+'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=3840&q=95',
+'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=3840&q=95',
+'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=3840&q=95',
+'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=3840&q=95',
+'https://images.unsplash.com/photo-1480497490787-505ec076689f?w=3840&q=95',
+'https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=3840&q=95',
+'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=3840&q=95',
+'https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?w=3840&q=95',
+'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=3840&q=95',
+'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=3840&q=95',
+'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=3840&q=95',
+'https://images.unsplash.com/photo-1445905595283-21f8ae8a33d2?w=3840&q=95'
 ];
-
-let currentBgIndex = 0;
-let activeBgElement = 1;
-let rotationTimer = null;
-
-// Background rotation
-function rotateBackground(){
-  currentBgIndex = (currentBgIndex + 1) % bgImages.length;
-  const nextBg = activeBgElement === 1 ? document.getElementById('bg2') : document.getElementById('bg1');
-  const currentBg = activeBgElement === 1 ? document.getElementById('bg1') : document.getElementById('bg2');
-  
-  nextBg.style.backgroundImage = `url('${bgImages[currentBgIndex]}')`;
-  nextBg.classList.add('active');
-  
-  setTimeout(() => currentBg.classList.remove('active'), 100);
-  activeBgElement = activeBgElement === 1 ? 2 : 1;
+let idx=0,act=1;
+const CODE={0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],45:['Fog','🌫️'],48:['Depositing rime fog','🌫️'],51:['Light drizzle','🌦️'],52:['Moderate drizzle','🌦️'],53:['Dense drizzle','🌦️'],56:['Freezing drizzle','🌧️'],57:['Dense freezing drizzle','🌧️'],61:['Slight rain','🌧️'],63:['Moderate rain','🌧️'],65:['Heavy rain','🌧️'],66:['Freezing rain','🌧️'],67:['Heavy freezing rain','🌧️'],71:['Slight snow','❄️'],73:['Moderate snow','❄️'],75:['Heavy snow','❄️'],77:['Snow grains','❄️'],80:['Slight rain showers','🌦️'],81:['Moderate rain showers','🌦️'],82:['Violent rain showers','⛈️'],85:['Slight snow showers','🌨️'],86:['Heavy snow showers','🌨️'],95:['Thunderstorm','⛈️'],96:['Thunderstorm w/ slight hail','⛈️'],99:['Severe thunderstorm','⛈️']};
+function rotate(){
+idx=(idx+1)%IMGS.length;
+const n=act===1?bg2:bg1,c=act===1?bg1:bg2;
+n.style.backgroundImage=`url('${IMGS[idx]}')`;
+n.classList.add('active');
+setTimeout(()=>c.classList.remove('active'),100);
+act=act===1?2:1;
 }
-
-function scheduleNextRotation(){
-  const delay = (60 + Math.random() * 60) * 1000;
-  rotationTimer = setTimeout(() => {
-    rotateBackground();
-    scheduleNextRotation();
-  }, delay);
+function schedule(){
+setTimeout(()=>{rotate();schedule()},(60+Math.random()*60)*1e3);
 }
-
-// Initialize background
-document.getElementById('bg1').style.backgroundImage = `url('${bgImages[0]}')`;
-document.getElementById('bg1').classList.add('active');
-scheduleNextRotation();
-
-// Button handler
-document.getElementById('btnReset').addEventListener('click', rotateBackground);
-
-// Clock
-function updateClock(){
-  const now = new Date();
-  let h = now.getHours();
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  h = h % 12 || 12;
-  const m = String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('time').innerHTML = `${h}:${m} <span class="ampm">${ampm}</span>`;
-  document.getElementById('date').textContent = now.toLocaleString('en-US', { 
-    weekday:'long', 
-    month:'long', 
-    day:'numeric', 
-    year:'numeric' 
-  });
+bg1.style.backgroundImage=`url('${IMGS[0]}')`;
+bg1.classList.add('active');
+schedule();
+btn.onclick=rotate;
+function clock(){
+const d=new Date();
+let h=d.getHours();
+const ap=h>=12?'PM':'AM';
+h=h%12||12;
+time.innerHTML=`${h}:${String(d.getMinutes()).padStart(2,'0')} <span class="ampm">${ap}</span>`;
+date.textContent=d.toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 }
-updateClock();
-setInterval(updateClock, 1000);
-
-// Weather
-const weatherCodeMap = {
-  0: ['Clear','☀️'], 1: ['Mainly clear','🌤️'], 2: ['Partly cloudy','⛅'], 3: ['Overcast','☁️'],
-  45: ['Fog','🌫️'], 48:['Depositing rime fog','🌫️'],
-  51:['Light drizzle','🌦️'], 52:['Moderate drizzle','🌦️'], 53:['Dense drizzle','🌦️'],
-  56:['Freezing drizzle','🌧️'], 57:['Dense freezing drizzle','🌧️'],
-  61:['Slight rain','🌧️'], 63:['Moderate rain','🌧️'], 65:['Heavy rain','🌧️'],
-  66:['Freezing rain','🌧️'], 67:['Heavy freezing rain','🌧️'],
-  71:['Slight snow','❄️'], 73:['Moderate snow','❄️'], 75:['Heavy snow','❄️'], 77:['Snow grains','❄️'],
-  80:['Slight rain showers','🌦️'], 81:['Moderate rain showers','🌦️'], 82:['Violent rain showers','⛈️'],
-  85:['Slight snow showers','🌨️'], 86:['Heavy snow showers','🌨️'],
-  95:['Thunderstorm','⛈️'], 96:['Thunderstorm w/ slight hail','⛈️'], 99:['Severe thunderstorm','⛈️']
-};
-
-async function fetchWeather(){
-  try{
-    const lat = 30.3938;
-    const lon = -86.2683;
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`;
-    const r = await fetch(url, {cache: "no-store"});
-    if(!r.ok) throw new Error('Weather fetch failed');
-    return await r.json();
-  }catch(err){
-    console.error('Weather error:', err);
-    return null;
-  }
+clock();
+setInterval(clock,1e3);
+async function weather(){
+try{
+const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`,{cache:"no-store"});
+if(!r.ok)return;
+const d=await r.json();
+if(!d||!d.current_weather)return;
+const cw=d.current_weather;
+const t=Math.round(cw.temperature);
+const m=CODE[cw.weathercode]||['Unknown','🌡️'];
+temp.innerHTML=`${t}<span class="unit">°</span>`;
+desc.textContent=m[0]+(cw.is_day===0?' (night)':'');
+updated.textContent=new Date().toLocaleString('en-US',{hour:'numeric',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
+if(d.daily&&d.daily.time){
+forecast.innerHTML='<div class="grid">'+d.daily.time.map((dt,i)=>{
+const dd=new Date(dt);
+const dn=i===0?'Today':dd.toLocaleDateString('en-US',{weekday:'short'});
+const wm=CODE[d.daily.weathercode[i]]||['Unknown','🌡️'];
+const hi=Math.round(d.daily.temperature_2m_max[i]);
+const lo=Math.round(d.daily.temperature_2m_min[i]);
+return`<div class="day"><div class="day-name">${dn}</div><div class="icon">${wm[1]}</div><div class="temps">${hi}° / ${lo}°</div></div>`;
+}).join('')+'</div>';
 }
-
-function displayWeather(data){
-  if(!data || !data.current_weather) return;
-  
-  const cw = data.current_weather;
-  const temp = Math.round(cw.temperature);
-  const wc = cw.weathercode;
-  const map = weatherCodeMap[wc] || ['Unknown','🌡️'];
-  
-  document.getElementById('temp').innerHTML = `${temp}<span class="temp-unit">°</span>`;
-  document.getElementById('desc').textContent = map[0] + (cw.is_day === 0 ? ' (night)' : '');
-  document.getElementById('updated').textContent = new Date().toLocaleString('en-US', { 
-    hour:'numeric', 
-    minute:'2-digit', 
-    weekday:'short', 
-    day:'numeric', 
-    month:'short' 
-  });
-  
-  // 7-day forecast
-  if(data.daily && data.daily.time){
-    const forecastHTML = data.daily.time.map((date, i) => {
-      const d = new Date(date);
-      const dayName = i === 0 ? 'Today' : d.toLocaleDateString('en-US', {weekday: 'short'});
-      const wcode = data.daily.weathercode[i];
-      const wmap = weatherCodeMap[wcode] || ['Unknown','🌡️'];
-      const high = Math.round(data.daily.temperature_2m_max[i]);
-      const low = Math.round(data.daily.temperature_2m_min[i]);
-      return `
-        <div class="forecast-day">
-          <div class="forecast-day-name">${dayName}</div>
-          <div class="forecast-icon">${wmap[1]}</div>
-          <div class="forecast-temp">${high}° / ${low}°</div>
-        </div>
-      `;
-    }).join('');
-    document.getElementById('forecast').innerHTML = `<div class="forecast-grid">${forecastHTML}</div>`;
-  }
+}catch(e){console.error(e)}
 }
-
-async function updateWeather(){
-  const data = await fetchWeather();
-  if(data) displayWeather(data);
+weather();
+setInterval(weather,3e5);
+function layout(){
+const w=innerWidth,h=innerHeight;
+document.body.classList.remove('mobile-portrait','mobile-landscape');
+if(w<=926){
+if(w>h)document.body.classList.add('mobile-landscape');
+else document.body.classList.add('mobile-portrait');
 }
-
-updateWeather();
-setInterval(updateWeather, 5 * 60 * 1000);
-
-// Responsive layout handler
-function handleLayout(){
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const isLandscape = w > h;
-  const isMobile = w <= 926;
-  
-  document.body.classList.remove('mobile-portrait', 'mobile-landscape');
-  
-  if(isMobile && isLandscape){
-    document.body.classList.add('mobile-landscape');
-  } else if(isMobile && !isLandscape){
-    document.body.classList.add('mobile-portrait');
-  }
 }
-
-handleLayout();
-window.addEventListener('resize', handleLayout);
-window.addEventListener('orientationchange', () => setTimeout(handleLayout, 100));
+layout();
+addEventListener('resize',layout);
+addEventListener('orientationchange',()=>setTimeout(layout,100));
 </script>
 </body>
 </html>
