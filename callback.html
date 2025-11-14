@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spotify callback</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#0b1220;color:#fff;margin:0}
+  .box{max-width:640px;padding:24px;border-radius:12px;background:rgba(255,255,255,0.03);text-align:center}
+  a{color:#69c0ff}
+  .ok{color:#b7f5c6}
+  .err{color:#ffb3b3}
+</style>
+</head>
+<body>
+<div class="box" id="box">
+  <h2>Finalizing Spotify login…</h2>
+  <div id="msg">Please wait — exchanging code for token.</div>
+</div>
+<script>
+(async function(){
+  const box = document.getElementById('msg');
+  function paramsFromHashOrQuery() {
+    const qs = window.location.search ? window.location.search.substring(1) : '';
+    const obj = {};
+    qs.split('&').forEach(p=>{
+      if(!p) return;
+      const [k,v] = p.split('=');
+      obj[decodeURIComponent(k)] = decodeURIComponent(v||'');
+    });
+    return obj;
+  }
+  const params = paramsFromHashOrQuery();
+  const code = params.code;
+  const state = params.state;
+  const savedState = localStorage.getItem('spotify_auth_state');
+  if(!code){
+    box.innerHTML = '<div class="err">Authorization failed: missing code.</div>';
+    console.error('No code in callback', window.location.href);
+    return;
+  }
+  if (savedState && state !== savedState) {
+    box.innerHTML = '<div class="err">State mismatch (possible CSRF). Aborting.</div>';
+    return;
+  }
+
+  const code_verifier = localStorage.getItem('spotify_code_verifier');
+  if(!code_verifier){
+    box.innerHTML = '<div class="err">Missing code verifier. Start login again.</div>';
+    return;
+  }
+
+  // Exchange code for token
+  const body = new URLSearchParams({
+    grant_type: 'authorization_code',
+    code: code,
+    redirect_uri: 'https://balsammmmmmmm.github.io/time-weather/callback.html',
+    client_id: '494ccfd29e8c424a84f5f71721f00033',
+    code_verifier: code_verifier
+  });
+
+  try{
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    });
+    if(!r.ok){
+      const txt = await r.text();
+      box.innerHTML = '<div class="err">Token exchange failed. See console.</div>';
+      console.error('token exchange error', r.status, txt);
+      return;
+    }
+    const data = await r.json();
+    // store tokens in localStorage in a clear shape used by index.html
+    const now = Date.now();
+    const expires_at = now + (data.expires_in ? data.expires_in * 1000 : 3600*1000);
+    const store = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token || null,
+      expires_at
+    };
+    localStorage.setItem('spotify_tokens_v1', JSON.stringify(store));
+    box.innerHTML = '<div class="ok">Login successful! Redirecting back…</div>';
+    // clean up verifier + state
+    localStorage.removeItem('spotify_code_verifier');
+    localStorage.removeItem('spotify_auth_state');
+
+    // redirect back to main page
+    setTimeout(()=>{ window.location.href = 'https://balsammmmmmmm.github.io/time-weather/'; }, 900);
+  }catch(e){
+    console.error('exchange error', e);
+    box.innerHTML = '<div class="err">Unexpected error. See console.</div>';
+  }
+})();
+</script>
+</body>
+</html>
