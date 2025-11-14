@@ -490,7 +490,7 @@ async function weather(){
         const hi = Math.round(d.daily.temperature_2m_max[i]);
         const lo = Math.round(d.daily.temperature_2m_min[i]);
         // attempt to use svg icon in /icons/{code}.svg; fall back to emoji if not found
-        const iconPath = `/icons/${wcode}.svg`;
+        const iconPath = `./icons/${wcode}.svg`;
         // produce html - using onerror to fallback to emoji
         return `<div class="day"><div class="day-name">${dn}</div><div class="icon"><img src="${iconPath}" width="28" onerror="this.onerror=null;this.replaceWith(document.createTextNode('${wm[1]}'))"></div><div class="temps">${hi}° / ${lo}°</div></div>`;
       }).join('');
