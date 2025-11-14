@@ -3,247 +3,176 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Clock + Weather + Spotify</title>
-<meta name="theme-color" content="#2196f3" />
+<title>StandBy — Clock · Weather · Music</title>
+<meta name="theme-color" content="#ffffff" />
 <style>
-/* ---------- base / original styles (slightly trimmed) ---------- */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;min-height:100vh;font-family:Inter,system-ui,-apple-system,sans-serif;overflow:hidden;position:fixed;width:100%}
-body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;align-items:center;justify-content:center;top:0;left:0;right:0;bottom:0}
-.bg{position:fixed;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s;z-index:0;pointer-events:none}
-.bg.active{opacity:1}
-.wrap{position:relative;z-index:1;width:100%;max-width:1400px;padding:24px;display:flex;flex-direction:column;gap:30px;align-items:center}
-.card{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);border-radius:24px;padding:40px 50px;box-shadow:0 8px 40px rgba(0,0,0,.3);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.15)}
-.clock{text-align:center;padding-right:50px;border-right:1px solid rgba(255,255,255,.2)}
-.time{font-weight:300;font-size:120px;line-height:.9;letter-spacing:-3px;text-shadow:0 4px 30px rgba(0,0,0,.2)}
-.ampm{font-size:.4em;font-weight:300;margin-left:4px}
-.date{margin-top:8px;font-size:1.8rem;text-shadow:0 2px 15px rgba(0,0,0,.2);font-weight:300;opacity:.95}
-.weather{padding-left:50px;display:flex;gap:40px;align-items:center}
-.temp{font-size:160px;font-weight:200;line-height:.9;letter-spacing:-3px}
-.unit{font-size:.4em;font-weight:300;vertical-align:top}
-.info h2{font-size:1.8rem;font-weight:300;margin-bottom:5px}
-.desc{font-size:1.2rem;font-weight:300;margin:8px 0;opacity:.9}
-.updated{font-size:.95rem;font-weight:300;opacity:.8}
-.forecast{width:100%;max-width:1200px}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
-.day{background:rgba(0,0,0,.25);border-radius:16px;padding:16px 12px;text-align:center;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(10px)}
-.day-name{font-weight:400;margin-bottom:8px;font-size:1rem}
-.icon{font-size:28px;margin:8px 0;height:28px}
-.temps{font-size:.9rem;font-weight:300;opacity:.9}
-.btn{position:fixed;top:20px;right:20px;z-index:999;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:12px;border-radius:12px;cursor:pointer;color:#fff;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
-.btn:hover{transform:scale(1.05)}
-@media (max-width:926px){
-  .mobile-portrait .card{padding:30px 35px}
-  .mobile-portrait .clock{padding-right:30px}
-  .mobile-portrait .weather{padding-left:30px;gap:25px}
-  .mobile-portrait .time{font-size:55px;letter-spacing:-2px}
-  .mobile-portrait .date{font-size:1.2rem}
-  .mobile-portrait .temp{font-size:75px;letter-spacing:-2px}
-  .mobile-portrait .weather{gap:20px}
-  .mobile-portrait .info h2{font-size:1.3rem}
-  .mobile-portrait .desc{font-size:.95rem}
-  .mobile-portrait .updated{font-size:.8rem}
-  .mobile-landscape .forecast{display:none}
-  .mobile-landscape .card{padding:30px 40px;width:90%;max-width:none}
-  .mobile-landscape .clock{padding-right:40px;flex:1}
-  .mobile-landscape .weather{padding-left:40px;flex:0 0 auto;flex-direction:column;gap:0}
-  .mobile-landscape .time{font-size:clamp(160px,22vw,250px);letter-spacing:-8px;display:flex;align-items:baseline;justify-content:center;flex-wrap:nowrap}
-  .mobile-landscape .ampm{margin-left:4px}
-  .mobile-landscape .date{font-size:clamp(1.8rem,3.5vw,2.8rem);margin-top:20px}
-  .mobile-landscape .temp{font-size:clamp(110px,14vw,160px);letter-spacing:-5px}
-  .mobile-landscape .info{display:none}
-  .mobile-landscape .btn{top:10px;right:10px;width:36px;height:36px;font-size:1rem}
-}
-@media (max-width:900px){
-  .grid{grid-template-columns:repeat(4,1fr)}
-  .day:nth-child(n+5){display:none}
-}
-
-/* ---------- Spotify UI: cleaner & compact ---------- */
-#spotify-login {
-  position:fixed;
-  bottom:20px; right:20px;
-  z-index:2000;
-  background:rgba(0,0,0,.45);
-  border:1px solid rgba(255,255,255,.12);
-  color:white;
-  padding:10px 14px;
-  border-radius:12px;
-  cursor:pointer;
-  backdrop-filter:blur(8px);
-  font-weight:500;
-}
-#spotify-now {
-  position:fixed;
-  bottom:20px; left:20px;
-  z-index:2000;
-  display:flex; gap:12px; align-items:center;
-  background:linear-gradient(90deg, rgba(0,0,0,.38), rgba(0,0,0,.22));
-  padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(8px); color:#fff; min-width:220px; max-width:420px;
-}
-#sp-cover{ width:56px; height:56px; border-radius:8px; flex:0 0 56px; background:#222; object-fit:cover }
-#sp-meta{ display:flex; flex-direction:column; gap:6px; min-width:0; overflow:hidden }
-#sp-title{ font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-#sp-artist{ font-size:12px; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-#sp-controls{ display:flex; gap:8px; align-items:center; margin-top:4px }
-#sp-controls button{ background:transparent; border:none; color:white; cursor:pointer; font-size:16px; opacity:.9 }
-#sp-controls button:hover{ opacity:1 }
-#sp-progress{ width:100%; height:5px; background:rgba(255,255,255,.12); border-radius:6px; overflow:hidden; margin-top:6px }
-#sp-progress-fill{ height:100%; width:0%; background:#1DB954; transition:width .25s linear }
-#sp-hide{ margin-left:8px; cursor:pointer; font-size:14px; opacity:0.9 }
-
-/* small screen tweak */
-@media (max-width:600px){
-  #sp-cover{ width:44px; height:44px; flex:0 0 44px }
-  #sp-title{ font-size:13px }
-  #sp-artist{ font-size:11px }
-}
+:root{--bg1:#f5f9fc;--glass:rgba(255,255,255,0.06);--glass-2:rgba(255,255,255,0.04);--stroke:rgba(255,255,255,0.12);--accent:#ffffff}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'SF Pro Text', 'Helvetica Neue', Arial;color:var(--accent);background:linear-gradient(180deg,#e8f0f7,#f5f9fc);-webkit-font-smoothing:antialiased}
+body{display:flex;align-items:center;justify-content:center;overflow:hidden}
+.app{width:100vw;height:100vh;display:flex;align-items:stretch;justify-content:center;padding:28px}
+.container{width:100%;height:100%;display:grid;gap:28px;align-items:center;justify-items:stretch}
+/* adaptive layout: landscape vs portrait */
+.container.landscape{grid-template-columns:1fr 420px;grid-template-rows:1fr}
+.container.portrait{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-items:start}
+/* left big clock card */
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:22px;padding:28px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--stroke);display:flex;flex-direction:column;justify-content:center}
+.clock{display:flex;flex-direction:column;gap:6px}
+.time{font-weight:300;letter-spacing:-4px}
+.date{opacity:0.9;font-weight:400}
+/* right weather card */
+.weather-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:18px;padding:20px;backdrop-filter:blur(14px);border:1px solid var(--stroke);display:flex;flex-direction:column;gap:12px}
+.weather-top{display:flex;align-items:center;gap:16px}
+.temp-ct{display:flex;flex-direction:column}
+.temp{font-weight:200}
+.cond{opacity:0.95}
+.forecast-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:4px}
+.f-day{width:54px;background:rgba(255,255,255,0.02);border-radius:10px;padding:8px;text-align:center;border:1px solid rgba(255,255,255,0.04)}
+.f-day .d{font-size:12px}
+.f-day img{width:28px;height:28px}
+/* spotify mini player (floating) */
+#spotify-now{position:fixed;left:20px;bottom:20px;z-index:2000;display:flex;align-items:center;gap:12px;background:linear-gradient(90deg, rgba(0,0,0,0.42), rgba(0,0,0,0.28));padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(8px)}
+#sp-cover{width:56px;height:56px;border-radius:8px;object-fit:cover}
+#sp-meta{display:flex;flex-direction:column;min-width:0}
+#sp-title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sp-artist{font-size:12px;opacity:0.9}
+#sp-progress{height:5px;background:rgba(255,255,255,0.08);border-radius:6px;margin-top:6px;overflow:hidden}
+#sp-progress-fill{height:100%;width:0%;background:var(--accent);transition:width .25s linear}
+#sp-controls{display:flex;gap:6px;margin-top:6px}
+#sp-controls button{background:transparent;border:none;color:var(--accent);font-size:16px;cursor:pointer;opacity:0.9}
+#spotify-login{position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);cursor:pointer}
+/* small screens */
+@media (max-width:900px){.container.landscape{grid-template-columns:1fr} .container{padding:16px} #spotify-now{left:12px;bottom:12px} .f-day{width:48px}}
+/* adaptive font sizes for tablet always-on */
+/* we'll set sizes via JS depending on orientation */
 </style>
 </head>
 <body>
-<button class="btn" id="btn" aria-label="Change wallpaper">⟳</button>
-<div class="bg" id="bg1"></div>
-<div class="bg" id="bg2"></div>
-
-<div class="wrap">
-  <div class="card">
-    <div class="clock">
-      <div class="time" id="time">--:--</div>
-      <div class="date" id="date">Loading...</div>
-    </div>
-    <div class="weather">
-      <div class="temp" id="temp">--<span class="unit">°</span></div>
-      <div class="info">
-        <h2>Santa Rosa Beach, FL</h2>
-        <div class="updated" id="updated">--</div>
-        <div class="desc" id="desc">—</div>
+<div class="app">
+  <div id="container" class="container landscape">
+    <div id="left" class="card clock-card card" aria-hidden="false">
+      <div class="clock">
+        <div id="time" class="time" style="font-size: clamp(60px, 12vw, 200px);">--:--</div>
+        <div id="date" class="date" style="font-size: clamp(18px, 2.4vw, 28px);">Loading…</div>
       </div>
     </div>
+
+    <div id="right" class="weather-card">
+      <div class="weather-top">
+        <div style="display:flex;flex-direction:column;align-items:flex-start">
+          <div id="temp" class="temp" style="font-size: clamp(36px, 8vw, 64px);">--<span class="unit">°</span></div>
+          <div id="desc" class="cond" style="font-size:16px">—</div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div id="location" style="font-weight:500;opacity:0.95">Santa Rosa Beach, FL</div>
+          <div id="updated" style="font-size:12px;opacity:0.8">--</div>
+        </div>
+      </div>
+      <div id="forecast" class="forecast-row" aria-live="polite"></div>
+    </div>
   </div>
-  <div class="forecast" id="forecast"></div>
 </div>
 
-<!-- Spotify UI -->
+<!-- spotify UI -->
 <div id="spotify-now" style="display:none" aria-live="polite">
-  <img id="sp-cover" src="" alt="cover"/>
+  <img id="sp-cover" src="" alt="cover" />
   <div id="sp-meta">
     <div id="sp-title">—</div>
     <div id="sp-artist">—</div>
-
     <div id="sp-progress"><div id="sp-progress-fill"></div></div>
-
-    <div id="sp-controls">
-      <button id="sp-prev" title="Previous">⏮</button>
-      <button id="sp-play" title="Play/Pause">⏯</button>
-      <button id="sp-next" title="Next">⏭</button>
-    </div>
+    <div id="sp-controls"><button id="sp-prev">⏮</button><button id="sp-play">⏯</button><button id="sp-next">⏭</button></div>
   </div>
-  <div id="sp-hide" title="Log out / hide">✕</div>
+  <div id="sp-hide" style="margin-left:8px;cursor:pointer;opacity:0.9">✕</div>
 </div>
-
 <button id="spotify-login">Login to Spotify</button>
 
 <script>
-/* -------------------- Spotify PKCE & config -------------------- */
+// ---------- Responsive behavior & wake lock ----------
+const container = document.getElementById('container');
+function applyLayout(){
+  const w = window.innerWidth, h = window.innerHeight;
+  if (w >= h) { // landscape
+    container.classList.remove('portrait'); container.classList.add('landscape');
+    document.documentElement.style.setProperty('--accent','#ffffff');
+  } else {
+    container.classList.remove('landscape'); container.classList.add('portrait');
+    document.documentElement.style.setProperty('--accent','#ffffff');
+  }
+  // adjust typography scales handled by clamp()
+}
+applyLayout(); window.addEventListener('resize',applyLayout);
+
+// Try to acquire wake lock to keep screen awake on supported browsers
+let wakeLock = null;
+async function requestWakeLock(){
+  try{ if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }
+  catch(e){ console.warn('Wake Lock failed', e); }
+}
+requestWakeLock();
+
+// ---------- Clock ----------
+function updateClock(){
+  const d = new Date();
+  let h = d.getHours();
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  const mins = String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('time').innerHTML = `${h}:${mins} <span style="font-size:0.26em;opacity:0.9;">${ap}</span>`;
+  document.getElementById('date').textContent = d.toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// ---------- Weather (open-meteo) with midday fix and icons in ./icons/ ----------
+const CODE = {0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],45:['Fog','🌫️'],48:['Depositing rime fog','🌫️'],51:['Light drizzle','🌦️'],52:['Moderate drizzle','🌦️'],53:['Dense drizzle','🌦️'],56:['Freezing drizzle','🌧️'],57:['Dense freezing drizzle','🌧️'],61:['Slight rain','🌧️'],63:['Moderate rain','🌧️'],65:['Heavy rain','🌧️'],66:['Freezing rain','🌧️'],67:['Heavy freezing rain','🌧️'],71:['Slight snow','❄️'],73:['Moderate snow','❄️'],75:['Heavy snow','❄️'],77:['Snow grains','❄️'],80:['Slight rain showers','🌦️'],81:['Moderate rain showers','🌦️'],82:['Violent rain showers','⛈️'],85:['Slight snow showers','🌨️'],86:['Heavy snow showers','🌨️'],95:['Thunderstorm','⛈️'],96:['Thunderstorm w/ slight hail','⛈️'],99:['Severe thunderstorm','⛈️']};
+
+async function fetchWeather(){
+  try{
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7', {cache:'no-store'});
+    if(!r.ok) return;
+    const d = await r.json();
+    if(!d || !d.current_weather) return;
+    const cw = d.current_weather;
+    document.getElementById('temp').innerHTML = Math.round(cw.temperature) + '<span class="unit">°</span>';
+    const mm = CODE[cw.weathercode] || ['Unknown','🌡️'];
+    document.getElementById('desc').textContent = mm[0] + (cw.is_day===0 ? ' (night)' : '');
+    document.getElementById('updated').textContent = new Date().toLocaleString('en-US',{hour:'numeric',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
+
+    if (d.daily && d.daily.time){
+      const html = d.daily.time.map((dt,i)=>{
+        const dtMid = dt + 'T12:00:00';
+        const dd = new Date(dtMid);
+        const dn = i===0 ? 'Today' : dd.toLocaleDateString('en-US',{weekday:'short'});
+        const wcode = d.daily.weathercode[i];
+        const wm = CODE[wcode] || ['Unknown','🌡️'];
+        const hi = Math.round(d.daily.temperature_2m_max[i]);
+        const lo = Math.round(d.daily.temperature_2m_min[i]);
+        const iconPath = './icons/'+wcode+'.svg';
+        return `<div class="f-day"><div class="d">${dn}</div><div class="icon"><img src="${iconPath}" width="28" onerror="this.onerror=null;this.replaceWith(document.createTextNode('${wm[1]}'))"></div><div class="temps">${hi}° / ${lo}°</div></div>`;
+      }).join('');
+      document.getElementById('forecast').innerHTML = html;
+    }
+  }catch(e){ console.error('weather',e) }
+}
+fetchWeather(); setInterval(fetchWeather, 300000);
+
+// ---------- Spotify PKCE & Now Playing (controls) ----------
 const SPOTIFY_CLIENT_ID = '494ccfd29e8c424a84f5f71721f00033';
 const REDIRECT_URI = 'https://balsammmmmmmm.github.io/time-weather/callback.html';
 const SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
 const TOKEN_STORAGE_KEY = 'spotify_tokens_v1';
 
-/* ---------- util helpers ---------- */
-function randString(length=96){
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-  let s = '';
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-  for (let i=0;i<length;i++){
-    s += chars[array[i] % chars.length];
-  }
-  return s;
-}
-function base64urlEncode(buffer){
-  let str = '';
-  const chunk = 0x8000;
-  for (let i=0;i<buffer.length;i+=chunk){
-    str += String.fromCharCode.apply(null, Array.from(buffer.slice(i,i+chunk)));
-  }
-  const b64 = btoa(str);
-  return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-}
-async function sha256(msg){
-  const enc = new TextEncoder();
-  const data = enc.encode(msg);
-  const h = await crypto.subtle.digest('SHA-256', data);
-  return new Uint8Array(h);
-}
+function randString(len=96){ const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'; let s=''; const a=new Uint8Array(len); crypto.getRandomValues(a); for(let i=0;i<len;i++) s+=chars[a[i]%chars.length]; return s; }
+async function sha256(msg){ const enc = new TextEncoder(); const data = enc.encode(msg); const h = await crypto.subtle.digest('SHA-256', data); return new Uint8Array(h); }
+function base64urlEncode(buf){ let str=''; const chunk=0x8000; for(let i=0;i<buf.length;i+=chunk) str+=String.fromCharCode.apply(null, Array.from(buf.slice(i,i+chunk))); const b = btoa(str); return b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
 
-/* ---------- start authorization ---------- */
-async function startAuth(){
-  const code_verifier = randString(96);
-  localStorage.setItem('spotify_code_verifier', code_verifier);
-  const hashed = await sha256(code_verifier);
-  const code_challenge = base64urlEncode(hashed);
+async function startAuth(){ const code_verifier = randString(96); localStorage.setItem('spotify_code_verifier', code_verifier); const hashed = await sha256(code_verifier); const code_challenge = base64urlEncode(hashed); const url = new URL('https://accounts.spotify.com/authorize'); url.searchParams.set('response_type','code'); url.searchParams.set('client_id',SPOTIFY_CLIENT_ID); url.searchParams.set('scope',SCOPES); url.searchParams.set('redirect_uri',REDIRECT_URI); url.searchParams.set('code_challenge_method','S256'); url.searchParams.set('code_challenge',code_challenge); const state = randString(16); localStorage.setItem('spotify_auth_state', state); url.searchParams.set('state', state); window.location.href = url.toString(); }
 
-  const url = new URL('https://accounts.spotify.com/authorize');
-  url.searchParams.set('response_type','code');
-  url.searchParams.set('client_id', SPOTIFY_CLIENT_ID);
-  url.searchParams.set('scope', SCOPES);
-  url.searchParams.set('redirect_uri', REDIRECT_URI);
-  url.searchParams.set('code_challenge_method', 'S256');
-  url.searchParams.set('code_challenge', code_challenge);
+function saveTokens(tokenObj){ const now = Date.now(); const expires_at = now + (tokenObj.expires_in ? tokenObj.expires_in*1000 : 3600*1000); const store = { access_token: tokenObj.access_token, refresh_token: tokenObj.refresh_token || (getStoredTokens()?.refresh_token || null), expires_at }; localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(store)); return store; }
+function getStoredTokens(){ try{ return JSON.parse(localStorage.getItem(TOKEN_STORAGE_KEY)); }catch(e){return null;} }
+function clearTokens(){ localStorage.removeItem(TOKEN_STORAGE_KEY); localStorage.removeItem('spotify_code_verifier'); localStorage.removeItem('spotify_auth_state'); }
 
-  const state = randString(16);
-  localStorage.setItem('spotify_auth_state', state);
-  url.searchParams.set('state', state);
+async function refreshAccessToken(){ const store = getStoredTokens(); if(!store || !store.refresh_token) return null; const body = new URLSearchParams({ grant_type:'refresh_token', refresh_token: store.refresh_token, client_id: SPOTIFY_CLIENT_ID }); try{ const r = await fetch('https://accounts.spotify.com/api/token',{ method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body: body.toString() }); if(!r.ok){ clearTokens(); updateSpotifyUI(null); return null;} const data = await r.json(); const saved = saveTokens(data); return saved; }catch(e){ console.error('refresh error', e); return null; } }
 
-  window.location.href = url.toString();
-}
-
-/* ---------- token storage ---------- */
-function saveTokens(tokenObj){
-  const now = Date.now();
-  const expires_at = now + (tokenObj.expires_in ? tokenObj.expires_in * 1000 : 3600*1000);
-  const store = {
-    access_token: tokenObj.access_token,
-    refresh_token: tokenObj.refresh_token || (getStoredTokens()?.refresh_token || null),
-    expires_at
-  };
-  localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(store));
-  return store;
-}
-function getStoredTokens(){
-  try { return JSON.parse(localStorage.getItem(TOKEN_STORAGE_KEY)); } catch(e){ return null; }
-}
-function clearTokens(){
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-  localStorage.removeItem('spotify_code_verifier');
-  localStorage.removeItem('spotify_auth_state');
-}
-
-/* ---------- refresh token ---------- */
-async function refreshAccessToken(){
-  const store = getStoredTokens();
-  if (!store || !store.refresh_token) return null;
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: store.refresh_token,
-    client_id: SPOTIFY_CLIENT_ID
-  });
-  try{
-    const r = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {'Content-Type':'application/x-www-form-urlencoded'},
-      body: body.toString()
-    });
-    if (!r.ok) { clearTokens(); updateSpotifyUI(null); return null; }
-    const data = await r.json();
-    const saved = saveTokens(data);
-    return saved;
-  }catch(e){ console.error('refresh error', e); return null; }
-}
-
-/* -------------------- Spotify now-playing + controls -------------------- */
 const loginBtn = document.getElementById('spotify-login');
 const spNow = document.getElementById('spotify-now');
 const spCover = document.getElementById('sp-cover');
@@ -255,271 +184,31 @@ const btnPlay = document.getElementById('sp-play');
 const btnNext = document.getElementById('sp-next');
 const btnPrev = document.getElementById('sp-prev');
 
-let nowPlayingTimer = null;
-const pollingInterval = 10000; // 10s
-let lastNowData = null;
-let lastFetchTime = 0;
-let progressTick = null;
+let nowPlayingTimer = null; const pollingInterval = 10000; let lastNowData = null; let lastFetchTime = 0; let progressTick = null;
 
-/* login button behavior */
-loginBtn.addEventListener('click', ()=>{
-  const s = getStoredTokens();
-  if (s && s.access_token) {
-    if (confirm('Log out from Spotify on this page?')) {
-      clearTokens();
-      updateSpotifyUI(null);
-    }
-  } else {
-    startAuth();
-  }
-});
-spHide.addEventListener('click', ()=>{
-  if (getStoredTokens()) {
-    if (confirm('Log out from Spotify on this page?')) {
-      clearTokens();
-      updateSpotifyUI(null);
-    }
-  } else {
-    spNow.style.display = 'none';
-  }
-});
+loginBtn.addEventListener('click', ()=>{ const s = getStoredTokens(); if(s && s.access_token){ if(confirm('Log out from Spotify on this page?')){ clearTokens(); updateSpotifyUI(null);} } else startAuth(); });
+spHide.addEventListener('click', ()=>{ if(getStoredTokens()){ if(confirm('Log out from Spotify on this page?')){ clearTokens(); updateSpotifyUI(null);} } else spNow.style.display='none'; });
 
-/* control endpoints (requires a Spotify active device) */
-async function callSpotifyEndpoint(method, endpoint, body=null){
-  const t = getStoredTokens();
-  if (!t) return;
-  if (Date.now() > t.expires_at - 5000) {
-    const ref = await refreshAccessToken();
-    if (!ref) return;
-  }
-  const token = getStoredTokens().access_token;
-  try{
-    const r = await fetch('https://api.spotify.com/v1' + endpoint, {
-      method,
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined
-    });
-    // do not force error handling: endpoints for play/next/prev sometimes return 204
-    return r;
-  }catch(e){
-    console.error('spotify control error', e);
-  }
-}
+async function callSpotifyEndpoint(method, endpoint, body=null){ const t = getStoredTokens(); if(!t) return; if(Date.now() > t.expires_at - 5000){ const ref = await refreshAccessToken(); if(!ref) return; } const token = getStoredTokens().access_token; try{ const r = await fetch('https://api.spotify.com/v1'+endpoint,{ method, headers:{ Authorization: 'Bearer '+token, 'Content-Type':'application/json' }, body: body ? JSON.stringify(body) : undefined }); return r; }catch(e){ console.error('spotify control error', e); }}
 
-btnPlay.onclick = async () => {
-  // toggle play/pause depending on last state known
-  if (lastNowData && lastNowData.is_playing) {
-    await callSpotifyEndpoint('PUT', '/me/player/pause');
-  } else {
-    await callSpotifyEndpoint('PUT', '/me/player/play');
-  }
-  // fetch immediately to sync UI
-  setTimeout(fetchNowPlaying, 800);
-};
-btnNext.onclick = async () => { await callSpotifyEndpoint('POST', '/me/player/next'); setTimeout(fetchNowPlaying, 800); };
-btnPrev.onclick = async () => { await callSpotifyEndpoint('POST', '/me/player/previous'); setTimeout(fetchNowPlaying, 800); };
+btnPlay.onclick = async ()=>{ if(lastNowData && lastNowData.is_playing) await callSpotifyEndpoint('PUT','/me/player/pause'); else await callSpotifyEndpoint('PUT','/me/player/play'); setTimeout(fetchNowPlaying,800); };
+btnNext.onclick = async ()=>{ await callSpotifyEndpoint('POST','/me/player/next'); setTimeout(fetchNowPlaying,800); };
+btnPrev.onclick = async ()=>{ await callSpotifyEndpoint('POST','/me/player/previous'); setTimeout(fetchNowPlaying,800); };
 
-/* fetch currently-playing */
-async function fetchNowPlaying(force=false){
-  const store = getStoredTokens();
-  if (!store) { updateSpotifyUI(null); return; }
-  if (Date.now() > store.expires_at - 5000) {
-    const ref = await refreshAccessToken();
-    if (!ref) { updateSpotifyUI(null); return; }
-  }
-  const token = getStoredTokens().access_token;
-  try{
-    const r = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (r.status === 204) { updateSpotifyUI(null); return; }
-    if (r.status === 401) { const ref = await refreshAccessToken(); if (ref) return fetchNowPlaying(true); updateSpotifyUI(null); return; }
-    if (!r.ok) { console.warn('now-playing status', r.status); updateSpotifyUI(null); return; }
-    const data = await r.json();
-    lastNowData = data;
-    lastFetchTime = Date.now();
-    updateSpotifyUI(data);
-  }catch(e){
-    console.error('fetch now playing error', e);
-    updateSpotifyUI(null);
-  }
-}
+async function fetchNowPlaying(force=false){ const store = getStoredTokens(); if(!store){ updateSpotifyUI(null); return; } if(Date.now() > store.expires_at - 5000){ const ref = await refreshAccessToken(); if(!ref){ updateSpotifyUI(null); return; } } const token = getStoredTokens().access_token; try{ const r = await fetch('https://api.spotify.com/v1/me/player/currently-playing',{ headers:{ Authorization:'Bearer '+token } }); if(r.status===204){ updateSpotifyUI(null); return; } if(r.status===401){ const ref = await refreshAccessToken(); if(ref) return fetchNowPlaying(true); updateSpotifyUI(null); return; } if(!r.ok){ console.warn('now-playing status', r.status); updateSpotifyUI(null); return; } const data = await r.json(); lastNowData = data; lastFetchTime = Date.now(); updateSpotifyUI(data); }catch(e){ console.error('fetch now playing error', e); updateSpotifyUI(null); } }
 
-/* progress animation tick between polls */
-function startProgressTick(){
-  if (progressTick) clearInterval(progressTick);
-  progressTick = setInterval(()=>{
-    if (!lastNowData || !lastNowData.progress_ms || !lastNowData.item) return;
-    const elapsed = Date.now() - lastFetchTime;
-    const current = (lastNowData.progress_ms || 0) + elapsed;
-    const duration = lastNowData.item.duration_ms || 1;
-    let pct = Math.min(100, (current / duration) * 100);
-    spProgressFill.style.width = pct + '%';
-    // update play/pause icon subtly
-    btnPlay.textContent = lastNowData.is_playing ? '⏸' : '⏯';
-  }, 500);
-}
-function stopProgressTick(){ if (progressTick) { clearInterval(progressTick); progressTick = null; } }
+function startProgressTick(){ if(progressTick) clearInterval(progressTick); progressTick = setInterval(()=>{ if(!lastNowData || !lastNowData.progress_ms || !lastNowData.item) return; const elapsed = Date.now() - lastFetchTime; const current = (lastNowData.progress_ms || 0) + elapsed; const duration = lastNowData.item.duration_ms || 1; let pct = Math.min(100, (current / duration) * 100); spProgressFill.style.width = pct + '%'; btnPlay.textContent = lastNowData.is_playing ? '⏸' : '⏯'; }, 500); }
+function stopProgressTick(){ if(progressTick){ clearInterval(progressTick); progressTick = null; } }
 
-/* update UI with data from Spotify */
-function updateSpotifyUI(data){
-  const stored = getStoredTokens();
-  // login button text
-  loginBtn.textContent = stored && stored.access_token ? 'Logout (Spotify)' : 'Login to Spotify';
+function updateSpotifyUI(data){ const stored = getStoredTokens(); loginBtn.textContent = stored && stored.access_token ? 'Logout (Spotify)' : 'Login to Spotify'; if(!stored){ spNow.style.display='none'; stopProgressTick(); return; } if(!data || !data.item){ spNow.style.display='flex'; spTitle.textContent='Not playing'; spArtist.textContent=''; spCover.src=''; spProgressFill.style.width='0%'; btnPlay.textContent='⏯'; stopProgressTick(); return; } const item = data.item; const artists = (item.artists||[]).map(a=>a.name).join(', '); const title = item.name || 'Unknown'; const cover = (item.album && item.album.images && item.album.images[0] && item.album.images[0].url) || ''; spNow.style.display='flex'; spTitle.textContent = title; spArtist.textContent = artists; spCover.src = cover; const progressMs = data.progress_ms || 0; const duration = item.duration_ms || 1; const pct = Math.min(100, (progressMs / duration) * 100); spProgressFill.style.width = pct + '%'; btnPlay.textContent = data.is_playing ? '⏸' : '⏯'; startProgressTick(); }
 
-  if (!stored) {
-    spNow.style.display = 'none';
-    stopProgressTick();
-    return;
-  }
+function startPolling(){ if(nowPlayingTimer) clearInterval(nowPlayingTimer); fetchNowPlaying(); nowPlayingTimer = setInterval(fetchNowPlaying, pollingInterval); }
+function stopPolling(){ if(nowPlayingTimer){ clearInterval(nowPlayingTimer); nowPlayingTimer = null; } }
+(function initSpotify(){ const s = getStoredTokens(); if(s && s.access_token) startPolling(); else spNow.style.display='none'; if(s) updateSpotifyUI(null); })();
 
-  if (!data || !data.item) {
-    spNow.style.display = 'flex';
-    spTitle.textContent = 'Not playing';
-    spArtist.textContent = '';
-    spCover.src = '';
-    spProgressFill.style.width = '0%';
-    btnPlay.textContent = '⏯';
-    stopProgressTick();
-    return;
-  }
+// Keep spotify UI visible when logged in
+(function restoreSpotifyVisibility(){ const s = getStoredTokens(); if(s && s.access_token) document.getElementById('spotify-now').style.display = 'flex'; })();
 
-  const item = data.item;
-  const artists = (item.artists||[]).map(a=>a.name).join(', ');
-  const title = item.name || 'Unknown';
-  const cover = (item.album && item.album.images && item.album.images[0] && item.album.images[0].url) || '';
-  spNow.style.display = 'flex';
-  spTitle.textContent = title;
-  spArtist.textContent = artists;
-  spCover.src = cover;
-  // set immediate progress
-  const progressMs = data.progress_ms || 0;
-  const duration = item.duration_ms || 1;
-  const pct = Math.min(100, (progressMs / duration) * 100);
-  spProgressFill.style.width = pct + '%';
-  btnPlay.textContent = data.is_playing ? '⏸' : '⏯';
-  // start progress tick that will animate between polls
-  startProgressTick();
-}
-
-/* polling control */
-function startPolling(){
-  if (nowPlayingTimer) clearInterval(nowPlayingTimer);
-  fetchNowPlaying();
-  nowPlayingTimer = setInterval(fetchNowPlaying, pollingInterval);
-}
-function stopPolling(){
-  if (nowPlayingTimer) { clearInterval(nowPlayingTimer); nowPlayingTimer = null; }
-}
-
-/* init */
-(function initSpotify(){
-  const s = getStoredTokens();
-  if (s && s.access_token) startPolling();
-  else spNow.style.display = 'none';
-  // Update UI if token present
-  if (s) updateSpotifyUI(null);
-})();
-
-/* -------------------- Weather + Clock + Background (original code with fixes) -------------------- */
-const IMGS=[
-'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=3840&q=95',
-'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=3840&q=95',
-'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=3840&q=95',
-'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=3840&q=95',
-'https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?w=3840&q=95',
-'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=3840&q=95',
-'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=3840&q=95',
-'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=3840&q=95',
-'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=3840&q=95',
-'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=3840&q=95'
-];
-let idx=0,act=1;
-function rotate(){
-  idx=(idx+1)%IMGS.length;
-  const n=act===1?bg2:bg1,c=act===1?bg1:bg2;
-  n.style.backgroundImage=`url('${IMGS[idx]}')`;
-  n.classList.add('active');
-  setTimeout(()=>c.classList.remove('active'),100);
-  act=act===1?2:1;
-}
-function schedule(){
-  setTimeout(()=>{rotate();schedule()},(60+Math.random()*60)*1e3);
-}
-bg1.style.backgroundImage=`url('${IMGS[0]}')`;
-bg1.classList.add('active');
-schedule();
-btn.onclick=rotate;
-
-function clock(){
-  const d=new Date();
-  let h=d.getHours();
-  const ap=h>=12?'PM':'AM';
-  h=h%12||12;
-  time.innerHTML=`${h}:${String(d.getMinutes()).padStart(2,'0')} <span class="ampm">${ap}</span>`;
-  date.textContent=d.toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-}
-clock();
-setInterval(clock,1e3);
-
-/* weather code with timezone/dayfix and icon fallback */
-const CODE = {0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],45:['Fog','🌫️'],48:['Depositing rime fog','🌫️'],51:['Light drizzle','🌦️'],52:['Moderate drizzle','🌦️'],53:['Dense drizzle','🌦️'],56:['Freezing drizzle','🌧️'],57:['Dense freezing drizzle','🌧️'],61:['Slight rain','🌧️'],63:['Moderate rain','🌧️'],65:['Heavy rain','🌧️'],66:['Freezing rain','🌧️'],67:['Heavy freezing rain','🌧️'],71:['Slight snow','❄️'],73:['Moderate snow','❄️'],75:['Heavy snow','❄️'],77:['Snow grains','❄️'],80:['Slight rain showers','🌦️'],81:['Moderate rain showers','🌦️'],82:['Violent rain showers','⛈️'],85:['Slight snow showers','🌨️'],86:['Heavy snow showers','🌨️'],95:['Thunderstorm','⛈️'],96:['Thunderstorm w/ slight hail','⛈️'],99:['Severe thunderstorm','⛈️']};
-
-async function weather(){
-  try{
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`, {cache:'no-store'});
-    if(!r.ok) return;
-    const d = await r.json();
-    if(!d || !d.current_weather) return;
-    const cw = d.current_weather;
-    const t = Math.round(cw.temperature);
-    const m = CODE[cw.weathercode] || ['Unknown','🌡️'];
-    temp.innerHTML = `${t}<span class="unit">°</span>`;
-    desc.textContent = m[0] + (cw.is_day===0 ? ' (night)' : '');
-    updated.textContent = new Date().toLocaleString('en-US',{hour:'numeric',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
-
-    // forecast build: force midday to avoid timezone shifting causing previous day
-    if (d.daily && d.daily.time){
-      const grid = d.daily.time.map((dt,i)=>{
-        // ensure midday to avoid timezone offsets that make the date appear as previous day
-        const dtMid = dt + "T12:00:00";
-        const dd = new Date(dtMid);
-        const dn = i===0 ? 'Today' : dd.toLocaleDateString('en-US',{weekday:'short'});
-        const wcode = d.daily.weathercode[i];
-        const wm = CODE[wcode] || ['Unknown','🌡️'];
-        const hi = Math.round(d.daily.temperature_2m_max[i]);
-        const lo = Math.round(d.daily.temperature_2m_min[i]);
-        // attempt to use svg icon in /icons/{code}.svg; fall back to emoji if not found
-        const iconPath = `./icons/${wcode}.svg`;
-        // produce html - using onerror to fallback to emoji
-        return `<div class="day"><div class="day-name">${dn}</div><div class="icon"><img src="${iconPath}" width="28" onerror="this.onerror=null;this.replaceWith(document.createTextNode('${wm[1]}'))"></div><div class="temps">${hi}° / ${lo}°</div></div>`;
-      }).join('');
-      forecast.innerHTML = '<div class="grid">'+grid+'</div>';
-    }
-  }catch(e){ console.error(e) }
-}
-weather();
-setInterval(weather,3e5);
-
-function layout(){
-  const w=innerWidth,h=innerHeight;
-  document.body.classList.remove('mobile-portrait','mobile-landscape');
-  if(w<=926){
-    if(w>h) document.body.classList.add('mobile-landscape');
-    else document.body.classList.add('mobile-portrait');
-  }
-}
-layout();
-addEventListener('resize',layout);
-addEventListener('orientationchange',()=>setTimeout(layout,100));
-
-/* -------------------- small improvement: auto-show spotify bar if login done but hidden -------------------- */
-(function restoreSpotifyVisibility(){
-  const s = getStoredTokens();
-  if (s && s.access_token) {
-    document.getElementById('spotify-now').style.display = 'flex';
-  }
-})();
 </script>
 </body>
 </html>
