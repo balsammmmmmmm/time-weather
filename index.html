@@ -35,6 +35,13 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 .day-name{font-weight:400;margin-bottom:8px;font-size:1rem}
 .icon{font-size:28px;margin:8px 0}
 .temps{font-size:.9rem;font-weight:300;opacity:.9}
+.spotify{width:100%;max-width:500px;background:rgba(0,0,0,.3);border-radius:20px;padding:20px 25px;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(10px);display:none;align-items:center;gap:20px}
+.spotify.active{display:flex}
+.album-art{width:80px;height:80px;border-radius:12px;object-fit:cover;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.track-info{flex:1;min-width:0}
+.track-name{font-size:1.2rem;font-weight:400;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.artist-name{font-size:.95rem;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spotify-icon{color:#1DB954;font-size:1.5rem}
 .btn{position:fixed;top:20px;right:20px;z-index:999;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:12px;border-radius:12px;cursor:pointer;color:#fff;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
 .btn:hover{transform:scale(1.05)}
 @media (max-width:926px){
@@ -58,6 +65,7 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 .mobile-landscape .temp{font-size:clamp(110px,14vw,160px);letter-spacing:-5px}
 .mobile-landscape .info{display:none}
 .mobile-landscape .btn{top:10px;right:10px;width:36px;height:36px;font-size:1rem}
+.mobile-landscape .spotify{display:none}
 }
 @media (max-width:900px){
 .grid{grid-template-columns:repeat(4,1fr)}
