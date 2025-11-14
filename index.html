@@ -1,4 +1,4 @@
-<!doctype html>
+layout<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -62,7 +62,8 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 .track-name{font-size:1.2rem;font-weight:400;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .artist-name{font-size:.95rem;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .spotify-icon{color:#1DB954;font-size:1.5rem}
-.btn-spotify{position:fixed;top:20px;left:20px;z-index:999;background:rgba(29,185,84,.3);border:1px solid rgba(29,185,84,.5);backdrop-filter:blur(10px);padding:8px 16px;border-radius:12px;cursor:pointer;color:#fff;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s;font-size:.9rem}
+.btn-spotify{position:fixed;top:20px;left:20px;z-index:999;background:rgba(29,185,84,.3);border:1px solid rgba(29,185,84,.5);backdrop-filter:blur(10px);padding:8px 16px;border-radius:12px;cursor:pointer;color:#fff;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s;font-size:.9rem;display:none}
+.btn-spotify.show{display:block}
 .btn-spotify:hover{transform:scale(1.05)}
 .btn{position:fixed;top:20px;right:20px;z-index:999;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:12px;border-radius:12px;cursor:pointer;color:#fff;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
 .btn:hover{transform:scale(1.05)}
@@ -96,7 +97,6 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 </style>
 </head>
 <body>
-<button class="btn-spotify" id="btnSpotify">Connect Spotify</button>
 <button class="btn" id="btn" aria-label="Change wallpaper">⟳</button>
 <div class="bg" id="bg1"></div>
 <div class="bg" id="bg2"></div>
@@ -116,14 +116,6 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 </div>
 </div>
 <div class="forecast" id="forecast"></div>
-<div class="spotify" id="spotify">
-<img class="album-art" id="albumArt" src="" alt="Album">
-<div class="track-info">
-<div class="track-name" id="trackName">No track playing</div>
-<div class="artist-name" id="artistName">Connect Spotify</div>
-</div>
-<div class="spotify-icon">♫</div>
-</div>
 </div>
 <script>
 const IMGS=[
