@@ -332,7 +332,19 @@ async function fetchNowPlaying(force=false){
     const r = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
       headers: { Authorization: 'Bearer ' + token }
     });
-    if (r.status === 204) { updateSpotifyUI(null); return; }
+    if (r.status === 204) {
+        console.log("No active device — trying to activate one…");
+
+        const ok = await activateAnyDevice();
+        if (ok) {
+            // retry after waking a device
+            return fetchNowPlaying(true);
+        }
+
+        updateSpotifyUI(null);
+        return;
+    }
+
     if (r.status === 401) { const ref = await refreshAccessToken(); if (ref) return fetchNowPlaying(true); updateSpotifyUI(null); return; }
     if (!r.ok) { console.warn('now-playing status', r.status); updateSpotifyUI(null); return; }
     const data = await r.json();
@@ -400,6 +412,30 @@ function updateSpotifyUI(data){
   btnPlay.textContent = data.is_playing ? '⏸' : '⏯';
   // start progress tick that will animate between polls
   startProgressTick();
+}
+// --- Fix: Activate a Spotify device when API returns 204 (no active device) ---
+async function activateAnyDevice() {
+    try {
+        const r = await callSpotifyEndpoint('GET', '/me/player/devices');
+        if (!r || !r.ok) return false;
+        const d = await r.json();
+
+        if (!d.devices || d.devices.length === 0) return false;
+
+        // pick active device or fallback to the first available
+        const dev = d.devices.find(x => x.is_active) || d.devices[0];
+
+        await callSpotifyEndpoint('PUT', '/me/player', {
+            device_ids: [dev.id],
+            play: false   // don't start music — just wake device
+        });
+
+        console.log("Activated device:", dev.name);
+        return true;
+    } catch (e) {
+        console.error('activate device error', e);
+        return false;
+    }
 }
 
 /* polling control */
