@@ -102,6 +102,10 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 </style>
 </head>
 <body>
+
+<!-- Web Playback SDK -->
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+
 <button class="btn" id="btn" aria-label="Change wallpaper">⟳</button>
 <div class="bg" id="bg1"></div>
 <div class="bg" id="bg2"></div>
@@ -148,7 +152,8 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 /* -------------------- Spotify PKCE & config -------------------- */
 const SPOTIFY_CLIENT_ID = '494ccfd29e8c424a84f5f71721f00033';
 const REDIRECT_URI = 'https://balsammmmmmmm.github.io/time-weather/callback.html';
-const SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
+// added streaming scope for Web Playback SDK
+const SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state streaming';
 const TOKEN_STORAGE_KEY = 'spotify_tokens_v1';
 
 /* ---------- util helpers ---------- */
@@ -306,18 +311,96 @@ async function callSpotifyEndpoint(method, endpoint, body=null){
   }
 }
 
+/* ---------- Web Playback SDK integration ---------- */
+let webPlayer;
+let webPlayerDeviceId = null;
+
+window.onSpotifyWebPlaybackSDKReady = () => {
+    const token = getStoredTokens()?.access_token;
+    if (!token) return;
+
+    webPlayer = new Spotify.Player({
+        name: 'TimeWeather Display Player',
+        getOAuthToken: cb => { cb(getStoredTokens()?.access_token); },
+        volume: 0.5
+    });
+
+    webPlayer.addListener('ready', ({ device_id }) => {
+        console.log("Web Playback Player Ready:", device_id);
+        webPlayerDeviceId = device_id;
+
+        // Make this device the active one (no autoplay)
+        callSpotifyEndpoint('PUT', '/me/player', { device_ids: [device_id], play: false });
+    });
+
+    webPlayer.addListener('not_ready', ({ device_id }) => {
+        console.log('Web Playback Player Offline', device_id);
+    });
+
+    // forward player state changes to our UI
+    webPlayer.addListener('player_state_changed', state => {
+        if (!state) return;
+        // build a minimal "now playing" structure compatible with our updateSpotifyUI
+        const item = state.track_window?.current_track;
+        const data = {
+          is_playing: !state.paused,
+          progress_ms: state.position,
+          item: item ? {
+            id: item.id,
+            name: item.name,
+            duration_ms: item.duration_ms,
+            artists: item.artists,
+            album: item.album,
+            external_urls: { spotify: item.uri }
+          } : null
+        };
+        lastNowData = data;
+        lastFetchTime = Date.now();
+        updateSpotifyUI(data);
+    });
+
+    webPlayer.connect();
+};
+
+/* ---------- control handlers (now using web player device when available) ---------- */
 btnPlay.onclick = async () => {
-  // toggle play/pause depending on last state known
+  // if web player is ready, route requests to it by setting device_id when playing
+  if (webPlayerDeviceId) {
+    // toggle using Web API endpoint but target our web player device
+    if (lastNowData && lastNowData.is_playing) {
+      await callSpotifyEndpoint('PUT', '/me/player/pause', { device_id: webPlayerDeviceId });
+    } else {
+      await callSpotifyEndpoint('PUT', '/me/player/play', { device_id: webPlayerDeviceId });
+    }
+    setTimeout(fetchNowPlaying, 600);
+    return;
+  }
+  // fallback to original behavior (external device)
   if (lastNowData && lastNowData.is_playing) {
     await callSpotifyEndpoint('PUT', '/me/player/pause');
   } else {
     await callSpotifyEndpoint('PUT', '/me/player/play');
   }
-  // fetch immediately to sync UI
   setTimeout(fetchNowPlaying, 800);
 };
-btnNext.onclick = async () => { await callSpotifyEndpoint('POST', '/me/player/next'); setTimeout(fetchNowPlaying, 800); };
-btnPrev.onclick = async () => { await callSpotifyEndpoint('POST', '/me/player/previous'); setTimeout(fetchNowPlaying, 800); };
+btnNext.onclick = async () => {
+  if (webPlayerDeviceId) {
+    await callSpotifyEndpoint('POST', '/me/player/next', { device_id: webPlayerDeviceId });
+    setTimeout(fetchNowPlaying, 600);
+    return;
+  }
+  await callSpotifyEndpoint('POST', '/me/player/next');
+  setTimeout(fetchNowPlaying, 800);
+};
+btnPrev.onclick = async () => {
+  if (webPlayerDeviceId) {
+    await callSpotifyEndpoint('POST', '/me/player/previous', { device_id: webPlayerDeviceId });
+    setTimeout(fetchNowPlaying, 600);
+    return;
+  }
+  await callSpotifyEndpoint('POST', '/me/player/previous');
+  setTimeout(fetchNowPlaying, 800);
+};
 
 /* fetch currently-playing */
 async function fetchNowPlaying(force=false){
