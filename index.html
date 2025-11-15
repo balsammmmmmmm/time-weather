@@ -35,6 +35,10 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
 .hour .t{font-weight:600}
 .hour .temp{opacity:.9;margin-top:6px}
 
+/* Section background dividers */
+.section{background:#050505;padding:10px;border-radius:6px}
+.humidity{color:#cfdff6;font-size:0.95rem}
+
 /* Sidebar / Weather */
 .sidebar .temp{font-size:44px;color:#fff;font-weight:700;margin-bottom:4px}
 .info h2{font-size:16px;color:#fff;margin:0 0 4px 0}
@@ -81,29 +85,36 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
 <div class="wrap">
   <div class="card">
     <div class="main">
-      <div class="clock">
-        <div class="time" id="time">--:--</div>
-        <div class="date" id="date">Loading...</div>
-      </div>
+        <div class="section clock">
+          <div class="time" id="time">--:--</div>
+          <div class="date" id="date">Loading...</div>
+        </div>
 
-      <div class="hours" id="hourly">
-        <!-- hourly tiles injected here -->
-      </div>
+        <div class="section">
+          <div class="hours" id="hourly">
+            <!-- hourly tiles injected here -->
+          </div>
+        </div>
 
-      <div style="opacity:.9;font-size:.95rem;color:#9fb0d6;margin-top:6px">Use the right panel for full weather + forecast.</div>
+        <div style="opacity:.9;font-size:.95rem;color:#9fb0d6;margin-top:6px">Use the right panel for full weather + forecast.</div>
     </div>
 
     <aside class="sidebar">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div class="temp" id="temp">--<span class="unit">°</span></div>
-          <div class="info"><h2>Santa Rosa Beach, FL</h2></div>
+      <div class="section" style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="temp" id="temp">--<span class="unit">°</span></div>
+            <div class="info"><h2>Santa Rosa Beach, FL</h2></div>
+          </div>
         </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="updated" id="updated">--</div>
+          <div class="humidity" id="humidity">Humidity: --%</div>
+        </div>
+        <div class="desc" id="desc">—</div>
       </div>
-      <div class="updated" id="updated">--</div>
-      <div class="desc" id="desc">—</div>
 
-      <div class="forecast" id="forecast"></div>
+      <div class="section forecast" id="forecast"></div>
     </aside>
   </div>
 </div>
@@ -585,6 +596,12 @@ async function weather(){
         idx = d.hourly.time.findIndex(ti => new Date(ti).getTime() >= cwMs);
         if (idx === -1) idx = 0;
       }
+      // humidity: try to read relativehumidity_2m from hourly data if available
+      let hum = null;
+      if (d.hourly.relativehumidity_2m && d.hourly.relativehumidity_2m.length > idx){
+        hum = Math.round(d.hourly.relativehumidity_2m[idx]);
+      }
+      document.getElementById('humidity').textContent = hum !== null ? `Humidity: ${hum}%` : 'Humidity: —';
       const hours = [];
       for (let i=idx;i<Math.min(idx+12,d.hourly.time.length);i++){
         const hh = d.hourly.time[i];
