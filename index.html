@@ -29,11 +29,13 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
 .ampm{font-size:.35em;margin-left:6px}
 .date{font-size:1.2rem;color:#cfdff6;font-weight:300}
 
-/* Hours grid (left column) */
-.hours{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-top:6px}
-.hour{background:#0a0a0a;padding:8px;border-radius:6px;text-align:center;color:#dfefff}
-.hour .t{font-weight:600}
-.hour .temp{opacity:.9;margin-top:6px}
+/* Forecast grid (now main focus) */
+.forecast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-top:6px}
+.day{background:#0a0a0a;padding:8px;border-radius:6px;text-align:center;color:#dfefff;border:0}
+.day-name{font-weight:600;margin-bottom:6px;font-size:0.9rem}
+.day .icon{margin:6px 0;height:28px;display:flex;align-items:center;justify-content:center}
+.day .icon img{width:28px;height:28px}
+.temps{font-size:0.85rem;opacity:0.9;color:#dfefff}
 
 /* Section background dividers */
 .section{background:#050505;padding:10px;border-radius:6px}
@@ -44,11 +46,6 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
 .info h2{font-size:16px;color:#fff;margin:0 0 4px 0}
 .desc{color:#cfdff6;margin-top:6px}
 .updated{color:#9fb0d6;font-size:.92rem}
-.forecast{margin-top:6px}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-.day{background:#0b0b0b;border-radius:8px;padding:10px;text-align:center;border:0}
-.day-name{font-weight:500;margin-bottom:6px;font-size:.95rem}
-.temps{font-size:.9rem;opacity:.95}
 
 /* Controls button */
 .btn{position:fixed;top:18px;right:18px;z-index:999;background:#111;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#e6eef8;font-weight:600;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
@@ -75,8 +72,10 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
 @media (orientation:landscape) and (max-height:600px){
   .card{gap:10px;padding:12px}
   .time{font-size:72px}
-  .hours{grid-template-columns:repeat(6,1fr);gap:6px}
-  .hour{padding:6px;font-size:0.85rem}
+  .forecast-grid{grid-template-columns:repeat(6,1fr);gap:6px}
+  .day{padding:6px;font-size:0.85rem}
+  .day .icon{height:20px;margin:4px 0}
+  .day .icon img{width:20px;height:20px}
   .section{padding:8px}
 }
 
@@ -84,7 +83,7 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
 @media (orientation:portrait) and (max-width:500px){
   .wrap{padding:16px;gap:12px}
   .time{font-size:80px}
-  .hours{grid-template-columns:repeat(3,1fr)}
+  .forecast-grid{grid-template-columns:repeat(3,1fr)}
   .section{padding:8px}
 }
 
@@ -107,13 +106,9 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
           <div class="date" id="date">Loading...</div>
         </div>
 
-        <div class="section">
-          <div class="hours" id="hourly">
-            <!-- hourly tiles injected here -->
-          </div>
+        <div class="section forecast" id="forecast">
+          <!-- forecast tiles injected here -->
         </div>
-
-        <div style="opacity:.9;font-size:.95rem;color:#9fb0d6;margin-top:6px">Use the right panel for full weather + forecast.</div>
     </div>
 
     <aside class="sidebar">
@@ -130,8 +125,6 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
         </div>
         <div class="desc" id="desc">—</div>
       </div>
-
-      <div class="section forecast" id="forecast"></div>
     </aside>
   </div>
 </div>
@@ -605,7 +598,7 @@ async function weather(){
     desc.textContent = m[0] + (cw.is_day===0 ? ' (night)' : '');
     updated.textContent = new Date().toLocaleString('en-US',{hour:'numeric',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
 
-    // Build hourly tiles (next 12 hours)
+    // Get humidity from hourly data (current hour)
     if (d.hourly && d.hourly.time && d.hourly.temperature_2m){
       let idx = d.hourly.time.indexOf(cw.time);
       if (idx === -1){
@@ -622,19 +615,9 @@ async function weather(){
       if (humEl) {
         humEl.textContent = hum !== null ? `Humidity: ${hum}%` : 'Humidity: —';
       }
-      const hours = [];
-      for (let i=idx;i<Math.min(idx+12,d.hourly.time.length);i++){
-        const hh = d.hourly.time[i];
-        const tempH = Math.round(d.hourly.temperature_2m[i]);
-        const codeH = (d.hourly.weathercode && d.hourly.weathercode[i]!==undefined) ? d.hourly.weathercode[i] : null;
-        const icon = codeH !== null ? (CODE[codeH] ? CODE[codeH][1] : '') : '';
-        const label = new Date(hh).toLocaleTimeString('en-US',{hour:'numeric'});
-        hours.push(`<div class="hour"><div class="t">${label}</div><div class="temp">${tempH}°</div><div class="icon" style="margin-top:6px">${icon}</div></div>`);
-      }
-      hourly.innerHTML = hours.join('');
     }
 
-    // daily forecast build (sidebar)
+    // daily forecast build (main area, card-style like hourly was)
     if (d.daily && d.daily.time){
       const grid = d.daily.time.map((dt,i)=>{
         const dtMid = dt + "T12:00:00";
@@ -647,7 +630,10 @@ async function weather(){
         const iconPath = `./icons/${wcode}.svg`;
         return `<div class="day"><div class="day-name">${dn}</div><div class="icon"><img src="${iconPath}" width="28" onerror="this.onerror=null;this.replaceWith(document.createTextNode('${wm[1]}'))"></div><div class="temps">${hi}° / ${lo}°</div></div>`;
       }).join('');
-      forecast.innerHTML = '<div class="grid">'+grid+'</div>';
+      const el = document.getElementById('forecast');
+      if (el) {
+        el.innerHTML = '<div class="forecast-grid">'+grid+'</div>';
+      }
     }
   }catch(e){ console.error(e) }
 }
