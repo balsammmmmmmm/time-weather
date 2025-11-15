@@ -8,10 +8,10 @@
 <style>
 /* Reset + base */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;min-height:100vh;font-family:Inter,system-ui,-apple-system,sans-serif;overflow:hidden;position:fixed;width:100%}
+html,body{height:100%;min-height:100vh;font-family:'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;overflow:hidden;position:fixed;width:100%;background:linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0f2e 100%)}
 
 /* Dark background */
-body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-content:center;top:0;left:0;right:0;bottom:0}
+body{color:#e6eef8;display:flex;align-items:center;justify-content:center;top:0;left:0;right:0;bottom:0}
 .bg{display:none}
 .bg.active{display:none}
 
@@ -19,72 +19,79 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
 .wrap{position:relative;z-index:1;width:100%;max-width:1400px;padding:24px;display:flex;flex-direction:column;gap:20px;align-items:center}
 
 /* Card: two-column layout 65% / 35% */
-.card{width:95%;max-width:1200px;display:grid;grid-template-columns:65% 35%;gap:16px;padding:20px;border-radius:8px;background:#000;border:0;box-shadow:none}
-.main{padding:10px;display:flex;flex-direction:column;gap:12px}
-.sidebar{padding:10px;display:flex;flex-direction:column;gap:10px}
+.card{width:95%;max-width:1200px;display:grid;grid-template-columns:65% 35%;gap:24px;padding:32px;border-radius:16px;background:linear-gradient(135deg, rgba(20,20,50,0.8) 0%, rgba(30,30,60,0.6) 100%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,255,255,0.1)}
+.main{padding:0;display:flex;flex-direction:column;gap:20px}
+.sidebar{padding:0;display:flex;flex-direction:column;gap:16px}
 
 /* Clock */
-.clock{display:flex;flex-direction:column;gap:6px}
-.time{font-weight:300;font-size:100px;line-height:.9;letter-spacing:-2px;color:#fff}
-.ampm{font-size:.35em;margin-left:6px}
-.date{font-size:1.2rem;color:#cfdff6;font-weight:300}
+.clock{display:flex;flex-direction:column;gap:8px}
+.time{font-weight:200;font-size:100px;line-height:.95;letter-spacing:-3px;color:#fff;text-shadow:0 2px 20px rgba(100,200,255,0.3)}
+.ampm{font-size:.35em;margin-left:8px;color:#64c8ff}
+.date{font-size:1.1rem;color:#b0c4ff;font-weight:300;letter-spacing:0.5px}
 
 /* Forecast grid (now main focus) */
-.forecast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-top:6px}
-.day{background:#0a0a0a;padding:8px;border-radius:6px;text-align:center;color:#dfefff;border:0}
-.day-name{font-weight:600;margin-bottom:6px;font-size:0.9rem}
-.day .icon{margin:6px 0;height:28px;display:flex;align-items:center;justify-content:center}
-.day .icon img{width:28px;height:28px}
-.temps{font-size:0.85rem;opacity:0.9;color:#dfefff}
+.forecast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:12px;margin-top:8px}
+.day{background:linear-gradient(135deg, rgba(40,60,120,0.4) 0%, rgba(30,50,100,0.3) 100%);padding:12px;border-radius:12px;text-align:center;color:#e0f0ff;border:1px solid rgba(100,150,255,0.2);transition:all 0.3s ease;cursor:default}
+.day:hover{background:linear-gradient(135deg, rgba(50,80,140,0.5) 0%, rgba(40,70,120,0.4) 100%);border-color:rgba(100,200,255,0.4);transform:translateY(-2px);box-shadow:0 8px 16px rgba(64,200,255,0.15)}
+.day-name{font-weight:700;margin-bottom:8px;font-size:0.95rem;color:#fff}
+.day .icon{margin:8px 0;height:32px;display:flex;align-items:center;justify-content:center}
+.day .icon img{width:32px;height:32px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
+.temps{font-size:0.88rem;opacity:1;color:#c0e0ff;font-weight:500}
 
 /* Section background dividers */
-.section{background:#050505;padding:10px;border-radius:6px}
-.humidity{color:#cfdff6;font-size:0.95rem}
+.section{background:linear-gradient(135deg, rgba(40,50,100,0.3) 0%, rgba(30,40,80,0.2) 100%);padding:16px;border-radius:12px;border:1px solid rgba(100,150,255,0.15);box-shadow:inset 0 1px 2px rgba(255,255,255,0.05)}
+.humidity{color:#b0d0ff;font-size:0.95rem;font-weight:500}
 
 /* Sidebar / Weather */
-.sidebar .temp{font-size:44px;color:#fff;font-weight:700;margin-bottom:4px}
-.info h2{font-size:16px;color:#fff;margin:0 0 4px 0}
-.desc{color:#cfdff6;margin-top:6px}
-.updated{color:#9fb0d6;font-size:.92rem}
+.sidebar .temp{font-size:56px;color:#64d8ff;font-weight:700;margin-bottom:6px;text-shadow:0 2px 10px rgba(100,216,255,0.3)}
+.info h2{font-size:18px;color:#fff;margin:0;font-weight:600;letter-spacing:0.3px}
+.desc{color:#b0d0ff;margin-top:8px;font-size:1rem;font-weight:500}
+.updated{color:#8aa0d0;font-size:.9rem;font-weight:400}
 
 /* Controls button */
-.btn{position:fixed;top:18px;right:18px;z-index:999;background:#111;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#e6eef8;font-weight:600;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.btn{position:fixed;top:18px;right:18px;z-index:999;background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:0;padding:8px;border-radius:10px;cursor:pointer;color:#fff;font-weight:700;width:44px;height:44px;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(29,185,84,0.3)}
+.btn:hover{background:linear-gradient(135deg, #1ed760 0%, #1db954 100%);transform:scale(1.05);box-shadow:0 6px 20px rgba(29,185,84,0.4)}
 
 /* Spotify UI */
-#spotify-login{position:fixed;bottom:20px;right:20px;z-index:2000;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.03);color:#e6eef8;padding:10px 14px;border-radius:12px;cursor:pointer}
-#spotify-now{position:fixed;bottom:20px;left:20px;z-index:2000;display:flex;gap:12px;align-items:center;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px);color:#e6eef8;min-width:220px;max-width:420px}
-#sp-cover{width:56px;height:56px;border-radius:8px;flex:0 0 56px;background:#111;object-fit:cover}
+#spotify-login{position:fixed;bottom:20px;right:20px;z-index:2000;background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(29,185,84,0.2)}
+#spotify-login:hover{background:linear-gradient(135deg, #1ed760 0%, #1db954 100%);box-shadow:0 6px 16px rgba(29,185,84,0.3);transform:translateY(-2px)}
+#spotify-now{position:fixed;bottom:20px;left:20px;z-index:2000;display:flex;gap:12px;align-items:center;background:linear-gradient(135deg, rgba(40,60,120,0.5) 0%, rgba(30,50,100,0.4) 100%);padding:12px;border-radius:14px;border:1px solid rgba(100,150,255,0.2);backdrop-filter:blur(10px);color:#e6eef8;min-width:240px;max-width:420px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+#sp-cover{width:56px;height:56px;border-radius:8px;flex:0 0 56px;background:#111;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
 #sp-meta{display:flex;flex-direction:column;gap:6px;min-width:0;overflow:hidden}
-#sp-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#sp-artist{font-size:12px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#sp-controls button{background:transparent;border:none;color:#e6eef8;cursor:pointer;font-size:16px}
-#sp-progress{width:100%;height:5px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
-#sp-progress-fill{height:100%;width:0%;background:#1DB954}
+#sp-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+#sp-artist{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b0d0ff}
+#sp-controls{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:6px}
+#sp-controls button{background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:none;color:#fff;cursor:pointer;font-size:13px;padding:6px 12px;border-radius:6px;transition:all 0.2s ease;font-weight:700;box-shadow:0 2px 6px rgba(29,185,84,0.25)}
+#sp-controls button:hover{background:linear-gradient(135deg, #1ed760 0%, #1db954 100%);box-shadow:0 4px 10px rgba(29,185,84,0.35)}
+#sp-controls button:active{transform:scale(0.95)}
+#sp-progress{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:4px}
+#sp-progress-fill{height:100%;width:0%;background:linear-gradient(90deg, #1db954, #1ed760)}
 
 /* Responsive */
 @media (max-width:880px){
-  .card{grid-template-columns:1fr}
-  .hours{grid-template-columns:repeat(4,1fr)}
+  .card{grid-template-columns:1fr;gap:20px;padding:20px}
+  .forecast-grid{grid-template-columns:repeat(4,1fr)}
   .time{font-size:54px}
 }
 
 /* Landscape mode fixes */
 @media (orientation:landscape) and (max-height:600px){
-  .card{gap:10px;padding:12px}
-  .time{font-size:72px}
-  .forecast-grid{grid-template-columns:repeat(6,1fr);gap:6px}
-  .day{padding:6px;font-size:0.85rem}
-  .day .icon{height:20px;margin:4px 0}
-  .day .icon img{width:20px;height:20px}
-  .section{padding:8px}
+  .card{gap:12px;padding:16px}
+  .time{font-size:64px;letter-spacing:-2px}
+  .forecast-grid{grid-template-columns:repeat(6,1fr);gap:8px}
+  .day{padding:8px;font-size:0.8rem}
+  .day .icon{height:24px;margin:4px 0}
+  .day .icon img{width:24px;height:24px}
+  .section{padding:10px}
 }
 
 /* Portrait mode on mobile */
 @media (orientation:portrait) and (max-width:500px){
-  .wrap{padding:16px;gap:12px}
-  .time{font-size:80px}
-  .forecast-grid{grid-template-columns:repeat(3,1fr)}
-  .section{padding:8px}
+  .wrap{padding:12px;gap:12px}
+  .card{gap:12px;padding:16px}
+  .time{font-size:72px}
+  .forecast-grid{grid-template-columns:repeat(3,1fr);gap:10px}
+  .section{padding:12px}
 }
 
 </style>
