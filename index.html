@@ -672,15 +672,32 @@ async function weather(){
     }
 
     // Sunrise / Sunset (daily arrays, first element = today)
-    if (d.daily && d.daily.sunrise && d.daily.sunset){
-      const sr = d.daily.sunrise[0];
-      const ss = d.daily.sunset[0];
+    if (d.daily){
+      const srArr = d.daily.sunrise || [];
+      const ssArr = d.daily.sunset || [];
+      const srRaw = srArr[0] || null;
+      const ssRaw = ssArr[0] || null;
       const srEl = document.getElementById('sunrise');
       const ssEl = document.getElementById('sunset');
-      try{
-        if (srEl && sr) srEl.textContent = new Date(sr).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-        if (ssEl && ss) ssEl.textContent = new Date(ss).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-      }catch(e){/* ignore formatting errors */}
+      function fmtTime(raw){
+        if (!raw) return '--:--';
+        try{
+          // Some APIs return 'YYYY-MM-DD HH:MM' (space) — normalize
+          const norm = raw.includes('T') ? raw : raw.replace(' ', 'T');
+          const dt = new Date(norm);
+          if (isNaN(dt.getTime())){
+            // fallback: try to extract HH:MM
+            const m = raw.match(/(\d{1,2}:\d{2})/);
+            return m ? m[0] : '--:--';
+          }
+          return dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        }catch(e){
+          const m = (''+raw).match(/(\d{1,2}:\d{2})/);
+          return m ? m[0] : '--:--';
+        }
+      }
+      if (srEl) srEl.textContent = fmtTime(srRaw);
+      if (ssEl) ssEl.textContent = fmtTime(ssRaw);
     }
 
     // build three-card forecast layout (left list + current large + sun arc)
