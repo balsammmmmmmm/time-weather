@@ -4,101 +4,69 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Clock + Weather + Spotify</title>
-<meta name="theme-color" content="#2196f3" />
+<meta name="theme-color" content="#000000" />
 <style>
-/* ---------- base / original styles (slightly trimmed) ---------- */
+/* Reset + base */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;min-height:100vh;font-family:Inter,system-ui,-apple-system,sans-serif;overflow:hidden;position:fixed;width:100%}
-body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;align-items:center;justify-content:center;top:0;left:0;right:0;bottom:0}
-.bg{position:fixed;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s;z-index:0;pointer-events:none}
+
+/* Dark background */
+body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-content:center;top:0;left:0;right:0;bottom:0}
+.bg{position:fixed;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s;z-index:0;pointer-events:none;filter:brightness(.6)}
 .bg.active{opacity:1}
-.wrap{position:relative;z-index:1;width:100%;max-width:1400px;padding:24px;display:flex;flex-direction:column;gap:30px;align-items:center}
-.card{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);border-radius:24px;padding:40px 50px;box-shadow:0 8px 40px rgba(0,0,0,.3);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.15)}
-.clock{text-align:center;padding-right:50px;border-right:1px solid rgba(255,255,255,.2)}
-.time{font-weight:300;font-size:120px;line-height:.9;letter-spacing:-3px;text-shadow:0 4px 30px rgba(0,0,0,.2)}
-.ampm{font-size:.4em;font-weight:300;margin-left:4px}
-.date{margin-top:8px;font-size:1.8rem;text-shadow:0 2px 15px rgba(0,0,0,.2);font-weight:300;opacity:.95}
-.weather{padding-left:50px;display:flex;gap:40px;align-items:center}
-.temp{font-size:160px;font-weight:200;line-height:.9;letter-spacing:-3px}
-.unit{font-size:.4em;font-weight:300;vertical-align:top}
-.info h2{font-size:1.8rem;font-weight:300;margin-bottom:5px}
-.desc{font-size:1.2rem;font-weight:300;margin:8px 0;opacity:.9}
-.updated{font-size:.95rem;font-weight:300;opacity:.8}
-.forecast{width:100%;max-width:1200px}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
-.day{background:rgba(0,0,0,.25);border-radius:16px;padding:16px 12px;text-align:center;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(10px)}
-.day-name{font-weight:400;margin-bottom:8px;font-size:1rem}
-.icon{font-size:28px;margin:8px 0;height:28px}
-.temps{font-size:.9rem;font-weight:300;opacity:.9}
-.btn{position:fixed;top:20px;right:20px;z-index:999;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:12px;border-radius:12px;cursor:pointer;color:#fff;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
-.btn:hover{transform:scale(1.05)}
-@media (max-width:926px){
-  .mobile-portrait .card{padding:30px 35px}
-  .mobile-portrait .clock{padding-right:30px}
-  .mobile-portrait .weather{padding-left:30px;gap:25px}
-  .mobile-portrait .time{font-size:55px;letter-spacing:-2px}
-  .mobile-portrait .date{font-size:1.2rem}
-  .mobile-portrait .temp{font-size:75px;letter-spacing:-2px}
-  .mobile-portrait .weather{gap:20px}
-  .mobile-portrait .info h2{font-size:1.3rem}
-  .mobile-portrait .desc{font-size:.95rem}
-  .mobile-portrait .updated{font-size:.8rem}
-  .mobile-landscape .forecast{display:none}
-  .mobile-landscape .card{padding:30px 40px;width:90%;max-width:none}
-  .mobile-landscape .clock{padding-right:40px;flex:1}
-  .mobile-landscape .weather{padding-left:40px;flex:0 0 auto;flex-direction:column;gap:0}
-  .mobile-landscape .time{font-size:clamp(160px,22vw,250px);letter-spacing:-8px;display:flex;align-items:baseline;justify-content:center;flex-wrap:nowrap}
-  .mobile-landscape .ampm{margin-left:4px}
-  .mobile-landscape .date{font-size:clamp(1.8rem,3.5vw,2.8rem);margin-top:20px}
-  .mobile-landscape .temp{font-size:clamp(110px,14vw,160px);letter-spacing:-5px}
-  .mobile-landscape .info{display:none}
-  .mobile-landscape .btn{top:10px;right:10px;width:36px;height:36px;font-size:1rem}
-}
-@media (max-width:900px){
-  .grid{grid-template-columns:repeat(4,1fr)}
-  .day:nth-child(n+5){display:none}
+
+/* Container */
+.wrap{position:relative;z-index:1;width:100%;max-width:1400px;padding:24px;display:flex;flex-direction:column;gap:20px;align-items:center}
+
+/* Card: two-column layout 65% / 35% */
+.card{width:95%;max-width:1200px;display:grid;grid-template-columns:65% 35%;gap:24px;padding:24px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.main{padding:12px;display:flex;flex-direction:column;gap:14px}
+.sidebar{padding:12px;display:flex;flex-direction:column;gap:12px}
+
+/* Clock */
+.clock{display:flex;flex-direction:column;gap:6px}
+.time{font-weight:300;font-size:100px;line-height:.9;letter-spacing:-2px;color:#fff}
+.ampm{font-size:.35em;margin-left:6px}
+.date{font-size:1.2rem;color:#cfdff6;font-weight:300}
+
+/* Hours grid (left column) */
+.hours{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:8px}
+.hour{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;color:#dfefff}
+.hour .t{font-weight:600}
+.hour .temp{opacity:.9;margin-top:6px}
+
+/* Sidebar / Weather */
+.sidebar .temp{font-size:48px;color:#fff;font-weight:600}
+.info h2{font-size:18px;color:#fff;margin-bottom:6px}
+.desc{color:#cfdff6}
+.updated{color:#9fb0d6;font-size:.95rem}
+.forecast{margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.day{background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,0.02)}
+.day-name{font-weight:500;margin-bottom:6px;font-size:.95rem}
+.temps{font-size:.9rem;opacity:.95}
+
+/* Controls button */
+.btn{position:fixed;top:18px;right:18px;z-index:999;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px);padding:10px;border-radius:10px;cursor:pointer;color:#e6eef8;font-weight:500;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+
+/* Spotify UI */
+#spotify-login{position:fixed;bottom:20px;right:20px;z-index:2000;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.03);color:#e6eef8;padding:10px 14px;border-radius:12px;cursor:pointer}
+#spotify-now{position:fixed;bottom:20px;left:20px;z-index:2000;display:flex;gap:12px;align-items:center;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px);color:#e6eef8;min-width:220px;max-width:420px}
+#sp-cover{width:56px;height:56px;border-radius:8px;flex:0 0 56px;background:#111;object-fit:cover}
+#sp-meta{display:flex;flex-direction:column;gap:6px;min-width:0;overflow:hidden}
+#sp-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sp-artist{font-size:12px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sp-controls button{background:transparent;border:none;color:#e6eef8;cursor:pointer;font-size:16px}
+#sp-progress{width:100%;height:5px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
+#sp-progress-fill{height:100%;width:0%;background:#1DB954}
+
+/* Responsive */
+@media (max-width:880px){
+  .card{grid-template-columns:1fr}
+  .hours{grid-template-columns:repeat(4,1fr)}
+  .time{font-size:54px}
 }
 
-/* ---------- Spotify UI: cleaner & compact ---------- */
-#spotify-login {
-  position:fixed;
-  bottom:20px; right:20px;
-  z-index:2000;
-  background:rgba(0,0,0,.45);
-  border:1px solid rgba(255,255,255,.12);
-  color:white;
-  padding:10px 14px;
-  border-radius:12px;
-  cursor:pointer;
-  backdrop-filter:blur(8px);
-  font-weight:500;
-}
-#spotify-now {
-  position:fixed;
-  bottom:20px; left:20px;
-  z-index:2000;
-  display:flex; gap:12px; align-items:center;
-  background:linear-gradient(90deg, rgba(0,0,0,.38), rgba(0,0,0,.22));
-  padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(8px); color:#fff; min-width:220px; max-width:420px;
-}
-#sp-cover{ width:56px; height:56px; border-radius:8px; flex:0 0 56px; background:#222; object-fit:cover }
-#sp-meta{ display:flex; flex-direction:column; gap:6px; min-width:0; overflow:hidden }
-#sp-title{ font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-#sp-artist{ font-size:12px; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-#sp-controls{ display:flex; gap:8px; align-items:center; margin-top:4px }
-#sp-controls button{ background:transparent; border:none; color:white; cursor:pointer; font-size:16px; opacity:.9 }
-#sp-controls button:hover{ opacity:1 }
-#sp-progress{ width:100%; height:5px; background:rgba(255,255,255,.12); border-radius:6px; overflow:hidden; margin-top:6px }
-#sp-progress-fill{ height:100%; width:0%; background:#1DB954; transition:width .25s linear }
-#sp-hide{ margin-left:8px; cursor:pointer; font-size:14px; opacity:0.9 }
-
-/* small screen tweak */
-@media (max-width:600px){
-  #sp-cover{ width:44px; height:44px; flex:0 0 44px }
-  #sp-title{ font-size:13px }
-  #sp-artist{ font-size:11px }
-}
 </style>
 </head>
 <body>
@@ -112,20 +80,32 @@ body{background:linear-gradient(180deg,#e8f0f7,#f5f9fc);color:#fff;display:flex;
 
 <div class="wrap">
   <div class="card">
-    <div class="clock">
-      <div class="time" id="time">--:--</div>
-      <div class="date" id="date">Loading...</div>
-    </div>
-    <div class="weather">
-      <div class="temp" id="temp">--<span class="unit">°</span></div>
-      <div class="info">
-        <h2>Santa Rosa Beach, FL</h2>
-        <div class="updated" id="updated">--</div>
-        <div class="desc" id="desc">—</div>
+    <div class="main">
+      <div class="clock">
+        <div class="time" id="time">--:--</div>
+        <div class="date" id="date">Loading...</div>
       </div>
+
+      <div class="hours" id="hourly">
+        <!-- hourly tiles injected here -->
+      </div>
+
+      <div style="opacity:.9;font-size:.95rem;color:#9fb0d6;margin-top:6px">Use the right panel for full weather + forecast.</div>
     </div>
+
+    <aside class="sidebar">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="temp" id="temp">--<span class="unit">°</span></div>
+          <div class="info"><h2>Santa Rosa Beach, FL</h2></div>
+        </div>
+      </div>
+      <div class="updated" id="updated">--</div>
+      <div class="desc" id="desc">—</div>
+
+      <div class="forecast" id="forecast"></div>
+    </aside>
   </div>
-  <div class="forecast" id="forecast"></div>
 </div>
 
 <!-- Spotify UI -->
@@ -586,7 +566,7 @@ const CODE = {0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloud
 
 async function weather(){
   try{
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`, {cache:'no-store'});
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&hourly=temperature_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`, {cache:'no-store'});
     if(!r.ok) return;
     const d = await r.json();
     if(!d || !d.current_weather) return;
@@ -597,10 +577,29 @@ async function weather(){
     desc.textContent = m[0] + (cw.is_day===0 ? ' (night)' : '');
     updated.textContent = new Date().toLocaleString('en-US',{hour:'numeric',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
 
-    // forecast build: force midday to avoid timezone shifting causing previous day
+    // Build hourly tiles (next 12 hours)
+    if (d.hourly && d.hourly.time && d.hourly.temperature_2m){
+      let idx = d.hourly.time.indexOf(cw.time);
+      if (idx === -1){
+        const cwMs = new Date(cw.time).getTime();
+        idx = d.hourly.time.findIndex(ti => new Date(ti).getTime() >= cwMs);
+        if (idx === -1) idx = 0;
+      }
+      const hours = [];
+      for (let i=idx;i<Math.min(idx+12,d.hourly.time.length);i++){
+        const hh = d.hourly.time[i];
+        const tempH = Math.round(d.hourly.temperature_2m[i]);
+        const codeH = (d.hourly.weathercode && d.hourly.weathercode[i]!==undefined) ? d.hourly.weathercode[i] : null;
+        const icon = codeH !== null ? (CODE[codeH] ? CODE[codeH][1] : '') : '';
+        const label = new Date(hh).toLocaleTimeString('en-US',{hour:'numeric'});
+        hours.push(`<div class="hour"><div class="t">${label}</div><div class="temp">${tempH}°</div><div class="icon" style="margin-top:6px">${icon}</div></div>`);
+      }
+      hourly.innerHTML = hours.join('');
+    }
+
+    // daily forecast build (sidebar)
     if (d.daily && d.daily.time){
       const grid = d.daily.time.map((dt,i)=>{
-        // ensure midday to avoid timezone offsets that make the date appear as previous day
         const dtMid = dt + "T12:00:00";
         const dd = new Date(dtMid);
         const dn = i===0 ? 'Today' : dd.toLocaleDateString('en-US',{weekday:'short'});
@@ -608,9 +607,7 @@ async function weather(){
         const wm = CODE[wcode] || ['Unknown','🌡️'];
         const hi = Math.round(d.daily.temperature_2m_max[i]);
         const lo = Math.round(d.daily.temperature_2m_min[i]);
-        // attempt to use svg icon in /icons/{code}.svg; fall back to emoji if not found
         const iconPath = `./icons/${wcode}.svg`;
-        // produce html - using onerror to fallback to emoji
         return `<div class="day"><div class="day-name">${dn}</div><div class="icon"><img src="${iconPath}" width="28" onerror="this.onerror=null;this.replaceWith(document.createTextNode('${wm[1]}'))"></div><div class="temps">${hi}° / ${lo}°</div></div>`;
       }).join('');
       forecast.innerHTML = '<div class="grid">'+grid+'</div>';
