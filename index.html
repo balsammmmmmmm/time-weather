@@ -36,6 +36,9 @@ body{display:flex;align-items:center;justify-content:center;top:0;left:0;right:0
 .info h2{font-size:1.1rem;color:#fff;margin:0;font-weight:600;letter-spacing:0.3px}
 .desc{color:#b0d0ff;margin-top:8px;font-size:1rem;font-weight:500}
 .humidity{color:#b0d0ff;font-size:1rem;font-weight:500}
+.sun-row{color:#b0d0ff;font-size:0.95rem}
+.sun-row .sun-item{display:flex;align-items:center;gap:6px;color:#b0d0ff;font-weight:500}
+.sun-row .sun-item span{color:#fff;font-weight:600;margin-left:4px}
 .updated{color:#8aa0d0;font-size:0.9rem;font-weight:400}
 .forecast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:12px;margin-top:8px}
 .day{background:linear-gradient(135deg, rgba(40,60,120,0.4) 0%, rgba(30,50,100,0.3) 100%);padding:12px;border-radius:12px;text-align:center;color:#e0f0ff;border:1px solid rgba(100,150,255,0.2);transition:all 0.3s ease;cursor:default}
@@ -44,6 +47,22 @@ body{display:flex;align-items:center;justify-content:center;top:0;left:0;right:0
 .day .icon{margin:8px 0;height:40px;display:flex;align-items:center;justify-content:center}
 .day .icon img{width:40px;height:40px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4)) brightness(1.4) contrast(1.3);opacity:1}
 .temps{font-size:0.9rem;color:#c0e0ff;font-weight:500}
+
+/* Minimalist three-card forecast layout (inspired by reference) */
+.forecast-grid-wrap{display:flex;gap:18px;align-items:stretch}
+.forecast-left{flex:1;display:flex;flex-direction:column;gap:8px}
+.forecast-right{flex:1;display:flex;flex-direction:column;gap:12px}
+.card-list{background:#0b0b0c;padding:12px;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+.card-list .row{display:flex;align-items:center;justify-content:space-between;padding:10px 8px;border-radius:12px;background:transparent}
+.row .label{display:flex;align-items:center;gap:10px;color:#cfeaff}
+.row .label img{width:22px;height:22px;filter:brightness(1.2) contrast(1.2)}
+.row .val{color:#ffffff;font-weight:700}
+.card-large{background:#0b0b0c;padding:18px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
+.card-large .left{display:flex;flex-direction:column;gap:6px}
+.card-large .right{font-size:56px;font-weight:700;color:#fff}
+.card-sun{background:#0b0b0c;padding:12px;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sun-line{width:100%;height:36px;border-radius:18px;background:linear-gradient(90deg,#222 0%,#222 100%);position:relative}
+.sun-dot{position:absolute;left:50%;top:-10px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #ffd36b, #ffb74d);box-shadow:0 6px 18px rgba(255,150,0,0.2)}
 .btn{position:fixed;top:18px;right:18px;z-index:999;background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:0;padding:8px;border-radius:10px;cursor:pointer;color:#fff;font-weight:700;width:44px;height:44px;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(29,185,84,0.3)}
 .btn:hover{background:linear-gradient(135deg, #1ed760 0%, #1db954 100%);transform:scale(1.05);box-shadow:0 6px 20px rgba(29,185,84,0.4)}
 #spotify-login{position:fixed;bottom:20px;right:20px;z-index:2000;background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600;font-size:0.9rem;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(29,185,84,0.2)}
@@ -128,15 +147,31 @@ body{display:flex;align-items:center;justify-content:center;top:0;left:0;right:0
             <div class="info"><h2>Santa Rosa Beach, FL</h2></div>
           </div>
         </div>
-        <div style="display:flex;gap:12px;align-items:center">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <div class="updated" id="updated">--</div>
           <div class="humidity" id="humidity">Humidity: --%</div>
+          <div class="sun-row" style="display:flex;gap:12px;align-items:center">
+            <div class="sun-item" title="Sunrise">🌅 <span id="sunrise">--:--</span></div>
+            <div class="sun-item" title="Sunset">🌇 <span id="sunset">--:--</span></div>
+          </div>
         </div>
         <div class="desc" id="desc">—</div>
       </div>
 
       <div class="section forecast" id="forecast">
-        <!-- forecast tiles injected here -->
+        <div class="forecast-grid-wrap">
+          <div class="forecast-left card-list" id="forecast-list">
+            <!-- left vertical list injected here -->
+          </div>
+          <div class="forecast-right" id="forecast-right">
+            <div class="card-large" id="current-card">
+              <!-- large current card injected here -->
+            </div>
+            <div class="card-sun" id="sun-card">
+              <!-- sun arc / sunrise-sunset injected here -->
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   </div>
@@ -572,7 +607,7 @@ const CODE = {0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloud
 
 async function weather(){
   try{
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&hourly=temperature_2m,weathercode,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`, {cache:'no-store'});
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&hourly=temperature_2m,weathercode,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=7`, {cache:'no-store'});
     if(!r.ok) return;
     const d = await r.json();
     if(!d || !d.current_weather) return;
@@ -585,16 +620,15 @@ async function weather(){
 
     // Get humidity from hourly data (current hour)
     if (d.hourly && d.hourly.time && d.hourly.temperature_2m){
-      let idx = d.hourly.time.indexOf(cw.time);
-      if (idx === -1){
+      let hIdx = d.hourly.time.indexOf(cw.time);
+      if (hIdx === -1){
         const cwMs = new Date(cw.time).getTime();
-        idx = d.hourly.time.findIndex(ti => new Date(ti).getTime() >= cwMs);
-        if (idx === -1) idx = 0;
+        hIdx = d.hourly.time.findIndex(ti => new Date(ti).getTime() >= cwMs);
+        if (hIdx === -1) hIdx = 0;
       }
-      // humidity: try to read relativehumidity_2m from hourly data if available
       let hum = null;
-      if (d.hourly && d.hourly.relativehumidity_2m && d.hourly.relativehumidity_2m.length > idx){
-        hum = Math.round(d.hourly.relativehumidity_2m[idx]);
+      if (d.hourly && d.hourly.relativehumidity_2m && d.hourly.relativehumidity_2m.length > hIdx){
+        hum = Math.round(d.hourly.relativehumidity_2m[hIdx]);
       }
       const humEl = document.getElementById('humidity');
       if (humEl) {
@@ -602,22 +636,54 @@ async function weather(){
       }
     }
 
-    // daily forecast build (main area, card-style like hourly was)
+    // Sunrise / Sunset (daily arrays, first element = today)
+    if (d.daily && d.daily.sunrise && d.daily.sunset){
+      const sr = d.daily.sunrise[0];
+      const ss = d.daily.sunset[0];
+      const srEl = document.getElementById('sunrise');
+      const ssEl = document.getElementById('sunset');
+      try{
+        if (srEl && sr) srEl.textContent = new Date(sr).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        if (ssEl && ss) ssEl.textContent = new Date(ss).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      }catch(e){/* ignore formatting errors */}
+    }
+
+    // build three-card forecast layout (left list + current large + sun arc)
     if (d.daily && d.daily.time){
-      const grid = d.daily.time.map((dt,i)=>{
-        const dtMid = dt + "T12:00:00";
-        const dd = new Date(dtMid);
-        const dn = i===0 ? 'Today' : dd.toLocaleDateString('en-US',{weekday:'short'});
-        const wcode = d.daily.weathercode[i];
-        const wm = CODE[wcode] || ['Unknown','🌡️'];
-        const hi = Math.round(d.daily.temperature_2m_max[i]);
-        const lo = Math.round(d.daily.temperature_2m_min[i]);
-        const iconPath = `./icons/${wcode}.svg`;
-        return `<div class="day"><div class="day-name">${dn}</div><div class="icon"><img src="${iconPath}" width="40" style="color:#64d8ff;fill:#64d8ff;stroke:#64d8ff" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:40px">${wm[1]}</span></div><div class="temps">${hi}° / ${lo}°</div></div>`;
-      }).join('');
-      const el = document.getElementById('forecast');
-      if (el) {
-        el.innerHTML = '<div class="forecast-grid">'+grid+'</div>';
+      const listEl = document.getElementById('forecast-list');
+      const curEl = document.getElementById('current-card');
+      const sunEl = document.getElementById('sun-card');
+
+      // left: show next 3 days as vertical list
+      if (listEl){
+        const rows = d.daily.time.slice(0,3).map((dt,i)=>{
+          const dtMid = dt + "T12:00:00";
+          const dd = new Date(dtMid);
+          const dn = i===0 ? 'Today' : dd.toLocaleDateString('en-US',{weekday:'short'});
+          const wcode = d.daily.weathercode[i];
+          const wm = CODE[wcode] || ['Unknown','🌡️'];
+          const hi = Math.round(d.daily.temperature_2m_max[i]);
+          const lo = Math.round(d.daily.temperature_2m_min[i]);
+          const iconPath = `./icons/${wcode}.svg`;
+          return `<div class="row"><div class="label"><img src="${iconPath}" alt="" onerror="this.style.display='none'"/><div><div style=\"font-weight:700;color:#fff\">${dn}</div><div style=\"font-size:0.85rem;color:#b8dfff\">${wm[0]}</div></div></div><div class="val">${hi}°/${lo}°</div></div>`;
+        }).join('');
+        listEl.innerHTML = rows;
+      }
+
+      // right-top: large current card
+      if (curEl){
+        const location = document.querySelector('.info h2')?.textContent || '';
+        const hi = Math.round(d.daily.temperature_2m_max[0]);
+        const lo = Math.round(d.daily.temperature_2m_min[0]);
+        const cond = CODE[cw.weathercode] ? CODE[cw.weathercode][0] : '';
+        curEl.innerHTML = `<div class="left"><div style="color:#b8dfff;font-size:0.95rem">${location} · ${cond}</div><div style="color:#9fdfff;font-size:0.9rem">H: ${hi}°  L: ${lo}°</div></div><div class="right">${t}°C</div>`;
+      }
+
+      // right-bottom: sun arc with sunrise/sunset if available
+      if (sunEl){
+        const sr = (d.daily.sunrise && d.daily.sunrise[0]) ? new Date(d.daily.sunrise[0]).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '--:--';
+        const ss = (d.daily.sunset && d.daily.sunset[0]) ? new Date(d.daily.sunset[0]).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '--:--';
+        sunEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;width:100%;color:#b8dfff;font-size:0.9rem;margin-bottom:8px"><div>${sr}</div><div>${ss}</div></div><div class=\"sun-line\"><div class=\"sun-dot\"></div></div>`;
       }
     }
   }catch(e){ console.error(e) }
