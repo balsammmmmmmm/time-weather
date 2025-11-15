@@ -71,6 +71,23 @@ body{background:#000;color:#e6eef8;display:flex;align-items:center;justify-conte
   .time{font-size:54px}
 }
 
+/* Landscape mode fixes */
+@media (orientation:landscape) and (max-height:600px){
+  .card{gap:10px;padding:12px}
+  .time{font-size:72px}
+  .hours{grid-template-columns:repeat(6,1fr);gap:6px}
+  .hour{padding:6px;font-size:0.85rem}
+  .section{padding:8px}
+}
+
+/* Portrait mode on mobile */
+@media (orientation:portrait) and (max-width:500px){
+  .wrap{padding:16px;gap:12px}
+  .time{font-size:80px}
+  .hours{grid-template-columns:repeat(3,1fr)}
+  .section{padding:8px}
+}
+
 </style>
 </head>
 <body>
@@ -577,7 +594,7 @@ const CODE = {0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloud
 
 async function weather(){
   try{
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&hourly=temperature_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`, {cache:'no-store'});
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=30.3938&longitude=-86.2683&current_weather=true&hourly=temperature_2m,weathercode,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`, {cache:'no-store'});
     if(!r.ok) return;
     const d = await r.json();
     if(!d || !d.current_weather) return;
@@ -598,10 +615,13 @@ async function weather(){
       }
       // humidity: try to read relativehumidity_2m from hourly data if available
       let hum = null;
-      if (d.hourly.relativehumidity_2m && d.hourly.relativehumidity_2m.length > idx){
+      if (d.hourly && d.hourly.relativehumidity_2m && d.hourly.relativehumidity_2m.length > idx){
         hum = Math.round(d.hourly.relativehumidity_2m[idx]);
       }
-      document.getElementById('humidity').textContent = hum !== null ? `Humidity: ${hum}%` : 'Humidity: —';
+      const humEl = document.getElementById('humidity');
+      if (humEl) {
+        humEl.textContent = hum !== null ? `Humidity: ${hum}%` : 'Humidity: —';
+      }
       const hours = [];
       for (let i=idx;i<Math.min(idx+12,d.hourly.time.length);i++){
         const hh = d.hourly.time[i];
