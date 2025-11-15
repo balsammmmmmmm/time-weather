@@ -25,7 +25,7 @@ body{color:#e6eef8;display:flex;align-items:center;justify-content:center;top:0;
 
 /* Clock */
 .clock{display:flex;flex-direction:column;gap:8px}
-.time{font-weight:200;font-size:100px;line-height:.95;letter-spacing:-3px;color:#fff;text-shadow:0 2px 20px rgba(100,200,255,0.3)}
+.time{font-weight:200;font-size:140px;line-height:.95;letter-spacing:-3px;color:#fff;text-shadow:0 2px 20px rgba(100,200,255,0.3)}
 .ampm{font-size:.35em;margin-left:8px;color:#64c8ff}
 .date{font-size:1.1rem;color:#b0c4ff;font-weight:300;letter-spacing:0.5px}
 
@@ -34,8 +34,8 @@ body{color:#e6eef8;display:flex;align-items:center;justify-content:center;top:0;
 .day{background:linear-gradient(135deg, rgba(40,60,120,0.4) 0%, rgba(30,50,100,0.3) 100%);padding:12px;border-radius:12px;text-align:center;color:#e0f0ff;border:1px solid rgba(100,150,255,0.2);transition:all 0.3s ease;cursor:default}
 .day:hover{background:linear-gradient(135deg, rgba(50,80,140,0.5) 0%, rgba(40,70,120,0.4) 100%);border-color:rgba(100,200,255,0.4);transform:translateY(-2px);box-shadow:0 8px 16px rgba(64,200,255,0.15)}
 .day-name{font-weight:700;margin-bottom:8px;font-size:0.95rem;color:#fff}
-.day .icon{margin:8px 0;height:32px;display:flex;align-items:center;justify-content:center}
-.day .icon img{width:32px;height:32px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
+.day .icon{margin:8px 0;height:40px;display:flex;align-items:center;justify-content:center}
+.day .icon img{width:40px;height:40px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2)) brightness(1.2);color:#64d8ff;fill:#64d8ff;stroke:#64d8ff;opacity:1}
 .temps{font-size:0.88rem;opacity:1;color:#c0e0ff;font-weight:500}
 
 /* Section background dividers */
@@ -43,7 +43,8 @@ body{color:#e6eef8;display:flex;align-items:center;justify-content:center;top:0;
 .humidity{color:#b0d0ff;font-size:0.95rem;font-weight:500}
 
 /* Sidebar / Weather */
-.sidebar .temp{font-size:56px;color:#64d8ff;font-weight:700;margin-bottom:6px;text-shadow:0 2px 10px rgba(100,216,255,0.3)}
+.sidebar .temp{font-size:80px;color:#64d8ff;font-weight:700;margin-bottom:6px;text-shadow:0 2px 10px rgba(100,216,255,0.3)}
+.temp .unit{font-size:0.65em;margin-left:2px}
 .info h2{font-size:18px;color:#fff;margin:0;font-weight:600;letter-spacing:0.3px}
 .desc{color:#b0d0ff;margin-top:8px;font-size:1rem;font-weight:500}
 .updated{color:#8aa0d0;font-size:.9rem;font-weight:400}
@@ -55,19 +56,17 @@ body{color:#e6eef8;display:flex;align-items:center;justify-content:center;top:0;
 /* Spotify UI */
 #spotify-login{position:fixed;bottom:20px;right:20px;z-index:2000;background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(29,185,84,0.2)}
 #spotify-login:hover{background:linear-gradient(135deg, #1ed760 0%, #1db954 100%);box-shadow:0 6px 16px rgba(29,185,84,0.3);transform:translateY(-2px)}
-#spotify-now{display:flex;flex-direction:row;gap:12px;align-items:flex-start;background:linear-gradient(135deg, rgba(40,60,120,0.5) 0%, rgba(30,50,100,0.4) 100%);padding:12px;border-radius:12px;border:1px solid rgba(100,150,255,0.15);backdrop-filter:blur(10px);color:#e6eef8;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-#sp-cover{width:52px;height:52px;border-radius:8px;flex:0 0 52px;background:#111;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
-#sp-meta{display:flex;flex-direction:column;gap:8px;min-width:0;overflow:hidden;flex:1}
+#spotify-now{display:flex;flex-direction:column;gap:12px;align-items:flex-start;background:linear-gradient(135deg, rgba(40,60,120,0.5) 0%, rgba(30,50,100,0.4) 100%);padding:0;border-radius:0;border:none;backdrop-filter:blur(10px);color:#e6eef8;width:100%;box-shadow:none}
+#sp-cover{width:56px;height:56px;border-radius:8px;flex:0 0 56px;background:#111;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+#sp-meta{display:flex;flex-direction:column;gap:6px;min-width:0;overflow:hidden;width:100%}
 #sp-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
-#sp-artist{font-size:12px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b0d0ff}
-#sp-progress{width:100%;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin:4px 0}
-#sp-progress-fill{height:100%;width:0%;background:linear-gradient(90deg, #1db954, #1ed760)}
-#sp-controls{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:0;width:100%}
-#sp-controls button{background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:none;color:#fff;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:4px;transition:all 0.2s ease;font-weight:700;box-shadow:0 2px 4px rgba(29,185,84,0.2);flex:1;font-size:14px}
-#sp-controls button:hover{background:linear-gradient(135deg, #1ed760 0%, #1db954 100%);box-shadow:0 3px 8px rgba(29,185,84,0.3)}
+#sp-artist{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b0d0ff}
+#sp-controls{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:6px;width:100%}
+#sp-controls button{background:linear-gradient(135deg, #1db954 0%, #1aa34a 100%);border:none;color:#fff;cursor:pointer;font-size:13px;padding:6px 12px;border-radius:6px;transition:all 0.2s ease;font-weight:700;box-shadow:0 2px 6px rgba(29,185,84,0.25);flex:1}
+#sp-controls button:hover{background:linear-gradient(135deg, #1ed760 0%, #1db954 100%);box-shadow:0 4px 10px rgba(29,185,84,0.35)}
 #sp-controls button:active{transform:scale(0.95)}
-#sp-hide{cursor:pointer;color:#b0d0ff;font-size:16px;padding:2px 6px;transition:color 0.2s;flex:0 0 auto}
-#sp-hide:hover{color:#64d8ff}
+#sp-progress{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:4px}
+#sp-progress-fill{height:100%;width:0%;background:linear-gradient(90deg, #1db954, #1ed760)}
 
 /* Responsive */
 @media (max-width:880px){
@@ -603,7 +602,7 @@ async function weather(){
     const cw = d.current_weather;
     const t = Math.round(cw.temperature);
     const m = CODE[cw.weathercode] || ['Unknown','🌡️'];
-    temp.innerHTML = `${t}<span class="unit">°</span>`;
+    temp.innerHTML = `${t}<span class="unit">°C</span>`;
     desc.textContent = m[0] + (cw.is_day===0 ? ' (night)' : '');
     updated.textContent = new Date().toLocaleString('en-US',{hour:'numeric',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
 
@@ -637,7 +636,7 @@ async function weather(){
         const hi = Math.round(d.daily.temperature_2m_max[i]);
         const lo = Math.round(d.daily.temperature_2m_min[i]);
         const iconPath = `./icons/${wcode}.svg`;
-        return `<div class="day"><div class="day-name">${dn}</div><div class="icon"><img src="${iconPath}" width="28" onerror="this.onerror=null;this.replaceWith(document.createTextNode('${wm[1]}'))"></div><div class="temps">${hi}° / ${lo}°</div></div>`;
+        return `<div class="day"><div class="day-name">${dn}</div><div class="icon"><img src="${iconPath}" width="40" style="color:#64d8ff;fill:#64d8ff;stroke:#64d8ff" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:40px">${wm[1]}</span></div><div class="temps">${hi}° / ${lo}°</div></div>`;
       }).join('');
       const el = document.getElementById('forecast');
       if (el) {
