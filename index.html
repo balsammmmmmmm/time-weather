@@ -3,22 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wall Clock & Weather</title>
+    <title>WallDash - Clock & Weather</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="script.js" defer></script>
 </head>
-<body>
-    <div class="container">
-        <div class="clock">
-            <h2 id="time">00:00:00</h2>
-            <p id="date">Monday, Jan 1</p>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-4xl mx-auto">
+        <!-- Clock Section -->
+        <div class="bg-gray-800 bg-opacity-70 rounded-3xl p-8 mb-6 shadow-2xl">
+            <div class="text-center">
+                <h1 class="text-6xl md:text-8xl font-bold tracking-tighter" id="time">00:00</h1>
+                <p class="text-2xl md:text-3xl mt-4" id="date">Monday, January 1</p>
+            </div>
         </div>
-        <div class="weather">
-            <h3 id="city">Loading...</h3>
-            <p id="temp">—°C</p>
-            <p id="desc">Weather loading...</p>
+
+        <!-- Weather Section -->
+        <div class="bg-gray-800 bg-opacity-70 rounded-3xl p-8 shadow-2xl">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center mb-6 md:mb-0">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-3xl font-bold" id="location">Loading...</h2>
+                        <p class="text-xl" id="weather-description">Fetching weather data</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="text-6xl font-bold mr-4" id="temperature">--°</div>
+                    <div class="w-20 h-20" id="weather-icon">
+                        <i data-feather="sun" class="w-full h-full"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                <div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl text-center">
+                    <p class="text-sm opacity-80">Humidity</p>
+                    <p class="text-2xl font-semibold" id="humidity">--%</p>
+                </div>
+                <div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl text-center">
+                    <p class="text-sm opacity-80">Wind</p>
+                    <p class="text-2xl font-semibold" id="wind">-- km/h</p>
+                </div>
+                <div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl text-center">
+                    <p class="text-sm opacity-80">Feels Like</p>
+                    <p class="text-2xl font-semibold" id="feels-like">--°</p>
+                </div>
+                <div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl text-center">
+                    <p class="text-sm opacity-80">Visibility</p>
+                    <p class="text-2xl font-semibold" id="visibility">-- km</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7-Day Forecast Section -->
+        <div class="bg-gray-800 bg-opacity-70 rounded-3xl p-8 mt-6 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6">7-Day Forecast</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-4" id="forecast-container">
+                <!-- Forecast items will be added here by JavaScript -->
+            </div>
         </div>
     </div>
-
-    <script src="script.js"></script>
+    <script>
+        feather.replace();
+        // Show loading state
+        document.addEventListener('DOMContentLoaded', () => {
+            const weatherElements = [
+                'location', 'temperature', 'weather-description',
+                'humidity', 'wind', 'feels-like', 'visibility'
+            ];
+            
+            weatherElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el.textContent.trim() === '') {
+                    el.textContent = 'Loading...';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

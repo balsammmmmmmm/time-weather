@@ -1,105 +1,54 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 body {
-    background: #1a1a2e;
-    color: #e0e0e0;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background-attachment: fixed;
 }
 
-.container {
+#time {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    letter-spacing: -0.05em;
+}
+
+#weather-icon i {
     width: 100%;
-    max-width: 400px;
-    padding: 20px;
-    background: rgba(20, 20, 40, 0.8);
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    height: 100%;
+    stroke-width: 1.5;
+}
+/* Animation for smoother transitions */
+.animate-fade {
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-.clock, .weather {
-    padding: 20px;
-    border-radius: 10px;
+/* Error state styles */
+.bg-gray-800.bg-opacity-70 button {
+    transition: all 0.2s ease;
 }
 
-.clock h2 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-    color: #ffffff;
+.bg-gray-800.bg-opacity-70 button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
-.clock p {
-    font-size: 1.2rem;
-    color: #aaa;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-
-.weather h3 {
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.weather p {
-    font-size: 1.5rem;
-    color: #ccc;
-}
-
-/* iPad-specific styles */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .container {
-        max-width: 100%;
-        padding: 15px;
+    #time {
+        font-size: 4rem !important;
     }
-
-    .clock h2, .weather h3 {
-        font-size: 2.5rem;
+    #date {
+        font-size: 1.5rem !important;
     }
-
-    .clock p, .weather p {
-        font-size: 1.2rem;
+    #forecast-container {
+        grid-template-columns: repeat(2, 1fr) !important;
     }
 }
 
-/* Make it look nice on iPad */
-@media (orientation: portrait) {
-    body {
-        padding: 0;
-        height: 100vh;
-    }
-
-    .container {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 20px 15px;
-    }
-
-    .clock {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .weather {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+@media (max-width: 480px) {
+    #forecast-container {
+        grid-template-columns: 1fr !important;
     }
 }
