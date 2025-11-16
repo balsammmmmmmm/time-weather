@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wall Clock and Weather</title>
+    <title>Wall Clock & Weather</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="clock-container">
-        <h2 id="clock"></h2>
-    </div>
-    <div class="weather-container">
-        <h2 id="weather-temp"></h2>
-        <p id="weather-description"></p>
+    <div class="container">
+        <div class="clock">
+            <h2 id="time">00:00:00</h2>
+            <p id="date">Monday, Jan 1</p>
+        </div>
+        <div class="weather">
+            <h3 id="city">Loading...</h3>
+            <p id="temp">—°C</p>
+            <p id="desc">Weather loading...</p>
+        </div>
     </div>
 
     <script src="script.js"></script>

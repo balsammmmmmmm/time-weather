@@ -1,45 +1,49 @@
-// Get the clock element
-const clockElement = document.getElementById('clock');
-
-// Function to update the clock
+// Clock Function
 function updateClock() {
-    const date = new Date();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const day = now.toLocaleDateString('en-US', { weekday: 'long' });
+    const date = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    clockElement.innerText = `${hours}:${minutes}:${seconds}`;
+    document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+    document.getElementById('date').textContent = `${day}, ${date}`;
 }
 
-// Update the clock every second
-setInterval(updateClock, 1000);
+// Weather Function
+async function fetchWeather() {
+    const city = 'London'; // Change this to your city
+    const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
 
-// Get the weather elements
-const temperatureElement = document.getElementById('weather-temp');
-const descriptionElement = document.getElementById('weather-description');
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=en`;
 
-// API endpoint for current weather
-const apiEndpoint = 'https://api.openweathermap.org/data/2.5/weather';
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-// Function to get the current weather
-function getCurrentWeather() {
-    fetch(apiEndpoint, {
-        params: {
-            lat: 'YOUR_LATITUDE',
-            lon: 'YOUR_LONGITUDE',
-            units: 'metric',
-            appid: 'YOUR_API_KEY',
-        },
-    })
-        .then(response => response.json())
-        .then(data => {
-            const temperature = data.main.temp;
-            const description = data.weather[0].description;
+        const cityElement = document.getElementById('city');
+        const tempElement = document.getElementById('temp');
+        const descElement = document.getElementById('desc');
 
-            temperatureElement.innerText = `${temperature}°C`;
-            descriptionElement.innerText = description;
-        });
+        cityElement.textContent = data.name;
+        tempElement.textContent = Math.round(data.main.temp) + '°C';
+        descElement.textContent = data.weather[0].description;
+
+    } catch (error) {
+        console.error('Weather fetch failed:', error);
+        document.getElementById('city').textContent = 'Error loading weather';
+        document.getElementById('temp').textContent = '—°C';
+        document.getElementById('desc').textContent = 'Check your API key';
+    }
 }
 
-// Get the current weather
-getCurrentWeather();
+// Initialize
+function init() {
+    updateClock();
+    setInterval(updateClock, 1000); // Update every second
+    fetchWeather(); // Load weather once
+}
+
+// Run on load
+document.addEventListener('DOMContentLoaded', init);
