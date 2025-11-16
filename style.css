@@ -6,6 +6,71 @@ body {
     background-attachment: fixed;
 }
 
+/* Constrain inner cards and center content */
+.bg-gray-800.bg-opacity-70 {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Main wrapper responsive height handling */
+.main-wrapper {
+    min-height: calc(100vh - 2rem);
+    /* allow content to grow but keep centered on short viewports */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Make forecast items uniform and vertically centered */
+#forecast-container > div {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Tweak small stat cards for consistent spacing */
+.bg-gray-700.bg-opacity-50 {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+
+/* Weather stats grid: ensure consistent card sizes and centered content */
+.weather-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    gap: 1.25rem;
+    align-items: stretch;
+    /* make rows responsive to viewport height */
+    grid-auto-rows: minmax(clamp(110px, 12vh, 220px), auto);
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* height responsive with viewport: use clamp to keep reasonable limits */
+    min-height: clamp(90px, 12vh, 180px);
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+
+.stat-card p { margin: 0; }
+.stat-card p + p { margin-top: 0.5rem; }
+
+/* Make the numeric value larger and fill more of the card */
+.stat-card p:last-child {
+    font-size: clamp(1.5rem, 4vh, 2.5rem);
+    font-weight: 800;
+    line-height: 1;
+}
+
+@media (min-width: 1024px) {
+    .stat-card p:last-child { font-size: 2rem; }
+}
+
 #time {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
     letter-spacing: -0.05em;
@@ -16,6 +81,35 @@ body {
     height: 100%;
     stroke-width: 1.5;
 }
+/* Ensure Feather SVG fills and is vertically centered next to the temperature */
+#weather-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#weather-icon svg {
+    width: 1.25em;
+    height: 1.25em;
+    display: block;
+    stroke-width: 1.6;
+}
+@media (min-width: 768px) {
+    #weather-icon svg { width: 1.6em; height: 1.6em; }
+}
+
+/* Make the weather icon match the temperature size (responsive) */
+#weather-icon svg {
+    width: 3rem;
+    height: 3rem;
+}
+@media (min-width: 768px) {
+    #weather-icon svg {
+        width: 3.75rem; /* matches text-6xl */
+        height: 3.75rem;
+    }
+}
+/* Ensure a little spacing between the temp and the icon */
+#weather-icon { margin-left: 0.5rem; }
 /* Animation for smoother transitions */
 .animate-fade {
     animation: fadeIn 0.5s ease-in-out;
@@ -42,13 +136,119 @@ body {
     #date {
         font-size: 1.5rem !important;
     }
+    .weather-stats {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+        gap: 0.5rem;
+    }
     #forecast-container {
         grid-template-columns: repeat(2, 1fr) !important;
     }
+}
+
+/* Mobile-only: hide full weather and forecast; show compact clock+temp */
+@media (max-width: 640px) {
+    #weather-section, #forecast-section {
+        display: none !important;
+    }
+    .mobile-only { display: flex !important; }
+    /* move clock and mobile temp into a single centered row */
+    body { padding-top: 1rem; padding-bottom: 1rem; }
+    #time { margin-right: 0.5rem; }
+    #mobile-temperature { font-size: clamp(2.2rem, 6vh, 3.5rem); }
+    #mobile-weather-icon svg { width: 1.6rem; height: 1.6rem; }
+}
+
+/* Ensure clock and mobile temp are horizontal and centered on small screens */
+@media (max-width: 640px) {
+    .clock-row { flex-direction: row !important; align-items: center; justify-content: center; gap: 0.75rem; }
+    .clock-row .text-center { text-align: left; }
+    /* hide the date to keep layout compact */
+    #date { display: none !important; }
+    /* ensure mobile temp sits inline with clock and has small left margin */
+    #mobile-top { margin-left: 0.5rem; }
+}
+
+/* Also treat short viewports as mobile (regardless of width) */
+@media (max-height: 750px) {
+    #weather-section, #forecast-section {
+        display: none !important;
+    }
+    .mobile-only { display: flex !important; }
+    .clock-row { flex-direction: row !important; align-items: center; justify-content: center; gap: 0.75rem; }
+    .clock-row .text-center { text-align: left; }
+    #date { display: none !important; }
+    body { padding-top: 1rem; padding-bottom: 1rem; }
+    #time { margin-right: 0.5rem; }
+    #mobile-temperature { font-size: clamp(2.2rem, 6vh, 3.5rem); }
+    #mobile-weather-icon svg { width: 1.6rem; height: 1.6rem; }
+    #mobile-top { margin-left: 0.5rem; }
+}
+
+/* hide mobile-only by default on desktop */
+.mobile-only { display: none; }
+
+/* Make the main clock slightly larger and responsive */
+#time {
+    font-size: clamp(3.5rem, 6vh + 2vw, 7rem) !important;
+    line-height: 0.95;
+}
+
+#date {
+    font-size: clamp(1rem, 2vh + 0.5vw, 2rem);
+    opacity: 0.95;
 }
 
 @media (max-width: 480px) {
     #forecast-container {
         grid-template-columns: 1fr !important;
     }
+}
+
+/* Ensure AQI number has no colored background — use text color only */
+#air-quality {
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    display: inline-block;
+    box-shadow: none !important;
+}
+
+#air-quality-aqi {
+    color: rgba(255,255,255,0.85);
+}
+
+/* Master mobile/short-viewport overrides: show date and scale elements to fill screen */
+@media (max-width: 640px), (max-height: 750px) {
+    /* show mobile block and hide detailed sections */
+    .mobile-only { display: flex !important; align-items: center; }
+    #weather-section, #forecast-section { display: none !important; }
+
+    /* expand main wrapper to full viewport and center content */
+    .main-wrapper { min-height: 100vh; justify-content: center; }
+
+    /* horizontal layout for clock and temp */
+    .clock-row { flex-direction: row !important; align-items: center; justify-content: center; gap: 1rem; }
+    .clock-row .text-center { text-align: center; }
+
+    /* show date on mobile and put it below the time */
+    #date { display: block !important; font-size: clamp(1rem, 3.5vh, 2rem); opacity: 0.95; margin-top: 0.3rem; }
+
+    /* scale clock, date, temperature and icon relative to viewport height */
+    #time { font-size: clamp(5rem, 18vh, 12rem) !important; line-height: 0.9; }
+    #mobile-temperature { font-size: clamp(3rem, 8vh, 6rem); margin-left: 0.25rem; }
+    #mobile-weather-icon svg { width: clamp(2.4rem, 8vh, 5rem); height: clamp(2.4rem, 8vh, 5rem); }
+
+    /* reduce outer paddings to maximize visible content */
+    body { padding: 0.4rem; }
+}
+
+/* Prevent scrolling and keep mobile content centered inside the viewport */
+@media (max-width: 640px), (max-height: 750px) {
+    html, body { height: 100%; overflow: hidden; }
+    .main-wrapper { height: 100vh; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+    /* ensure the clock and temp don't overflow vertically */
+    .clock-row { max-height: 100%; box-sizing: border-box; }
+    #time, #mobile-temperature { white-space: nowrap; max-height: 82vh; overflow: hidden; }
+    #mobile-weather-icon svg { max-height: 82vh; max-width: 40vw; }
 }
