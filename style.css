@@ -1,0 +1,14 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+.clock-container {
+    text-align: center;
+    margin-top: 20vh;
+}
+
+.weather-container {
+    text-align: center;
+    margin-top: 10vh;
+}
