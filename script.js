@@ -15,33 +15,19 @@ function updateClock() {
 // Weather Functionality
 async function fetchWeather() {
     try {
-        let latitude, longitude;
-        
-        // Try to get user's location, fallback to default if denied
-        try {
-            const position = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    timeout: 5000,
-                    maximumAge: 60000
-                });
-            });
-            latitude = position.coords.latitude;
-            longitude = position.coords.longitude;
-        } catch (geoError) {
-            console.log('Using default location');
-            // Default to Santa Rosa Beach, FL
-            latitude = 30.3935;
-            longitude = -86.2518;
-        }
-        // Fetch weather data from WeatherAPI
-        const weatherResponse = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=5f5d5e5f5e5d5e5d5e5d5e5d5e5d5e5d&q=${latitude},${longitude}&days=7&aqi=no&alerts=no`);
+        // Use fixed coordinates for Santa Rosa Beach, FL
+        // Do NOT attempt to fetch user's geolocation — app should always show these coords.
+        const LAT = 30.3938;
+        const LON = -86.2683;
+        // Fetch weather data from WeatherAPI using lat/lon
+        const weatherResponse = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=5f5d5e5f5e5d5e5d5e5d5e5d5e5d5e5d&q=${LAT},${LON}&days=7&aqi=no&alerts=no`);
         const weatherData = await weatherResponse.json();
         
         if (!weatherResponse.ok) {
             throw new Error(weatherData.error?.message || 'Failed to fetch weather data');
         }
-        // Update DOM with weather data
-        document.getElementById('location').textContent = `${weatherData.location.name}, ${weatherData.location.country}`;
+        // Update DOM with weather data (fixed location label)
+        document.getElementById('location').textContent = 'Santa Rosa Beach, FL (30.3938, -86.2683)';
         document.getElementById('temperature').textContent = `${Math.round(weatherData.current.temp_c)}°`;
         document.getElementById('weather-description').textContent = weatherData.current.condition.text;
         document.getElementById('humidity').textContent = `${weatherData.current.humidity}%`;
