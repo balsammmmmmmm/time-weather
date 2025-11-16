@@ -97,7 +97,7 @@ body {
     #weather-icon svg { width: 1.6em; height: 1.6em; }
 }
 
-/* Make the weather icon match the temperature size (responsive) */
+/* Make the weather icon match the dstemperature size (responsive) */
 #weather-icon svg {
     width: 3rem;
     height: 3rem;

@@ -45,7 +45,7 @@ async function fetchWeather() {
             air = null;
         }
 
-        // Small mapping from Open-Meteo weathercode -> [label, feather-icon]
+        // Small mapping from Open-Meteo weatahercode -> [label, feather-icon]
         const OM = {
             0: ['Clear', 'sun'],
             1: ['Mainly clear', 'sun'],
