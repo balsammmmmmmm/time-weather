@@ -1,97 +1,521 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WallDash - Clock & Weather</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="script.js" defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TERMINL-style Dashboard — Santa Rosa Beach</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Feather icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <!-- Use a neutral system font similar to e-ink -->
+  <style>
+    :root{
+      --bg: #f7f7f5;
+      --panel: #ffffff;
+      --ink: #000000;
+      --muted: #000000;
+      --dot: rgba(0,0,0,0.06);
+    }
+    html,body{
+      height:100%;
+      background: var(--bg);
+      color: var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Arial;
+    }
+    .dot-sep {
+      background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+      background-size: 6px 6px;
+    }
+    .thin-border { border: 1px solid rgba(0,0,0,0.08); }
+    .dotted { border-top: 1px dotted rgba(0,0,0,0.08); }
+    @media (max-width: 500px) {
+      #ipad-layout { display: none; }
+      #iphone-layout { display: flex; }
+    }
+    @media (min-width: 501px) {
+      #ipad-layout { display: grid; }
+      #iphone-layout { display: none; }
+    }
+    .ref-img { display:none; }
+  </style>
 </head>
-<body class="bg-gray-900 text-white h-screen w-screen flex flex-col items-center justify-center overflow-hidden p-4">
-    <div class="w-full max-w-5xl h-auto flex flex-col justify-center items-center gap-6 mx-auto">
-        <!-- Clock Section -->
-        <div class="clock-row flex items-center justify-center">
-            <div class="text-center">
-                <h1 class="text-6xl md:text-8xl font-bold tracking-tighter" id="time">00:00</h1>
-                <p class="text-2xl md:text-3xl mt-4" id="date">Monday, January 1</p>
+<body class="p-4">
+
+  <!-- iPhone Portrait Layout: Full-screen big time + temp -->
+  <div id="iphone-layout" class="flex flex-col items-center justify-center h-screen gap-4">
+    <div id="iphone-time" class="text-[96px] leading-none font-light tracking-tight select-none"></div>
+    <div id="iphone-temp" class="text-5xl font-medium select-none"></div>
+    <div id="iphone-sub" class="text-base text-black select-none">Santa Rosa Beach, 32459 · Celsius</div>
+  </div>
+
+  <!-- iPad Layout (grid 2 columns) -->
+  <div id="ipad-layout" class="min-h-screen grid grid-cols-1 gap-4">
+
+    <!-- Weather + Forecast (full width) -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Weather panel -->
+      <div class="thin-border rounded-2xl bg-white p-4 dot-sep">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="text-sm uppercase text-black mb-1 font-bold">Weather</div>
+            <div class="flex items-end gap-3">
+              <div id="weather-icon" class="w-24 h-24 flex items-center justify-center rounded-md thin-border">
+                <!-- feather icon inserted by JS -->
+              </div>
+              <div>
+                <div id="main-temp" class="text-6xl font-light leading-none">--°C</div>
+                <div id="weather-desc" class="text-base text-black mt-1 font-bold">Loading…</div>
+              </div>
             </div>
-            <!-- Mobile-only temperature beside clock -->
-            <div id="mobile-top" class="mobile-only ml-4 flex items-center">
-                <div id="mobile-temperature" class="text-5xl font-bold">--°</div>
-                <div id="mobile-weather-icon" class="w-12 h-12 ml-2"></div>
-            </div>
+          </div>
+
+          <div class="text-right">
+            <div class="text-sm text-black font-bold">AQI</div>
+            <div id="aqi-box" class="thin-border rounded-lg px-3 py-2 mt-1 text-xl font-medium">—</div>
+
+            <div class="text-sm text-black mt-3 font-bold">Humidity</div>
+            <div id="humidity-box" class="thin-border rounded-lg px-3 py-2 mt-1 text-xl font-medium">—%</div>
+          </div>
         </div>
 
-        <!-- Weather Section -->
-        <div id="weather-section" class="bg-gray-800 bg-opacity-70 rounded-3xl p-6 md:p-8 shadow-2xl w-full max-w-5xl">
-            <div class="flex flex-col md:flex-row items-center justify-between">
-                <div class="flex items-center mb-4 md:mb-0">
-                    <div class="text-center md:text-left">
-                        <h2 class="text-2xl md:text-3xl font-bold" id="location">Loading...</h2>
-                        <p class="text-lg md:text-xl" id="weather-description">Fetching weather data</p>
-                    </div>
-                </div>
-                <div class="flex items-center">
-                    <div class="text-5xl md:text-6xl font-bold mr-3 md:mr-4" id="temperature">--°</div>
-                    <div class="w-16 h-16 md:w-20 md:h-20" id="weather-icon">
-                        <i data-feather="sun" class="w-full h-full"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="grid weather-stats grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mt-6 md:mt-8">
-                <div class="bg-gray-700 bg-opacity-50 stat-card p-3 rounded-xl text-center text-sm md:text-base" data-card="humidity">
-                    <p class="text-xs md:text-sm opacity-80">Humidity.</p>
-                    <p class="text-xl md:text-2xl font-semibold" id="humidity">--%</p>
-                </div>
-                <div class="bg-gray-700 bg-opacity-50 stat-card p-3 rounded-xl text-center text-sm md:text-base" data-card="wind">
-                    <p class="text-xs md:text-sm opacity-80">Wind</p>
-                    <p class="text-xl md:text-2xl font-semibold" id="wind">-- km/h</p>
-                </div>
-                <div class="bg-gray-700 bg-opacity-50 stat-card p-3 rounded-xl text-center text-sm md:text-base" data-card="feels-like">
-                    <p class="text-xs md:text-sm opacity-80">Feels Like</p>
-                    <p class="text-xl md:text-2xl font-semibold" id="feels-like">--°</p>
-                </div>
-                <div class="bg-gray-700 bg-opacity-50 stat-card p-3 rounded-xl text-center text-sm md:text-base" data-card="visibility">
-                    <p class="text-xs md:text-sm opacity-80">Visibility</p>
-                    <p class="text-xl md:text-2xl font-semibold" id="visibility">-- km</p>
-                </div>
-                <div class="bg-gray-700 bg-opacity-50 stat-card p-3 rounded-xl text-center text-sm md:text-base transition-all duration-500" data-card="air-quality" id="air-quality-card">
-                    <p class="text-xs md:text-sm opacity-80 mb-1">Air Quality</p>
-                    <div class="flex flex-col items-center justify-center">
-                        <span class="text-3xl md:text-4xl font-bold transition-colors duration-500" id="air-quality">—</span>
-                        <span class="text-xs md:text-sm font-semibold mt-1 transition-colors duration-500" id="air-quality-aqi"></span>
-                        <span class="text-xs opacity-60 mt-1" id="air-quality-legend">AQI (US EPA)</span>
-                    </div>
-                </div>
-            </div>
+        <div class="dotted my-3"></div>
+
+        <div class="grid grid-cols-3 gap-2 text-base text-black">
+          <div class="thin-border rounded-lg p-3">
+            <div class="text-sm font-bold">Feels</div>
+            <div id="feels" class="font-medium text-lg">—°C</div>
+          </div>
+          <div class="thin-border rounded-lg p-3">
+            <div class="text-sm font-bold">Visibility</div>
+            <div id="visibility" class="font-medium text-lg">— km</div>
+          </div>
+          <div class="thin-border rounded-lg p-3">
+            <div class="text-sm font-bold">Wind</div>
+            <div id="wind" class="font-medium text-lg">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clock panel -->
+      <div class="thin-border rounded-2xl bg-white p-4 flex items-center justify-between">
+        <div>
+          <div class="text-sm text-black font-bold">Local Time</div>
+          <div id="time" class="text-7xl font-light leading-none select-none">--:--</div>
         </div>
 
-        <!-- 7-Day Forecast Section -->
-        <div id="forecast-section" class="bg-gray-800 bg-opacity-70 rounded-3xl p-6 md:p-8 shadow-2xl w-full max-w-5xl">
-            <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">7-Day Forecast</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 md:gap-4" id="forecast-container">
-                <!-- Forecast items will be added here by JavaScript -->
-            </div>
+        <div class="text-right">
+          <div id="date" class="text-base text-black mb-2 font-bold"></div>
+          <div class="thin-border rounded-lg px-4 py-3">
+            <div class="text-sm text-black font-bold">Temp (C)</div>
+            <div id="side-temp" class="text-4xl font-medium">--°</div>
+            <div class="text-sm text-black mt-1 font-bold">Santa Rosa Beach</div>
+          </div>
         </div>
+      </div>
     </div>
-    <script>
-        feather.replace();
-        // Show loading state
-        document.addEventListener('DOMContentLoaded', () => {
-            const weatherElements = [
-                'location', 'temperature', 'weather-description',
-                'humidity', 'wind', 'feels-like', 'visibility'
-            ];
-            
-            weatherElements.forEach(id => {
-                const el = document.getElementById(id);
-                if (el.textContent.trim() === '') {
-                    el.textContent = 'Loading...';
+
+    <!-- Forecast panel (full width) -->
+    <div class="thin-border rounded-2xl bg-white p-4 dot-sep">
+      <div class="flex items-center justify-between">
+        <div class="text-sm uppercase text-black font-bold">7-Day Forecast</div>
+        <div class="text-sm text-black font-bold">Santa Rosa Beach</div>
+      </div>
+
+      <div id="forecast" class="grid grid-cols-7 gap-2 mt-3">
+        <!-- JS will fill 7 day boxes -->
+      </div>
+    </div>
+
+    <!-- Bottom row: Currency + Stocks -->
+    <div class="grid grid-cols-2 gap-4">
+
+      <!-- Currency panel -->
+      <div class="thin-border rounded-2xl bg-white p-4 dot-sep">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-black font-bold">Currency</div>
+            <div class="text-4xl font-medium" id="usd-kzt">$ 1 = — ₸</div>
+            <div class="text-sm text-black mt-1 font-bold" id="currency-source">Source: exchangerate.host</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stocks panel -->
+      <div class="thin-border rounded-2xl bg-white p-4 dot-sep">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm uppercase text-black font-bold">Stocks / Commodities</div>
+          <div class="text-sm text-black font-bold">Prices (USD)</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-xl">
+          <div class="thin-border rounded-lg p-4">
+            <div class="text-sm text-black font-bold">SPY</div>
+            <div id="spy" class="text-3xl font-medium">—</div>
+            <div id="spy-chg" class="text-base text-black font-bold">—</div>
+          </div>
+
+          <div class="thin-border rounded-lg p-4">
+            <div class="text-sm text-black font-bold">Gold (XAU / GC=F)</div>
+            <div id="gold" class="text-3xl font-medium">—</div>
+            <div id="gold-chg" class="text-base text-black font-bold">—</div>
+          </div>
+        </div>
+
+        <div class="dotted my-3"></div>
+
+        <div class="text-sm text-black font-bold">Note: Yahoo Finance unofficial endpoint used; CORS may apply when opened locally.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* -------------------- Utilities & Config -------------------- */
+    // User provided coords (Santa Rosa Beach)
+    const LAT = 30.3960;
+    const LON = -86.2288;
+    const ZIP = "32459";
+    const LOCATION_NAME = "Santa Rosa Beach";
+
+    // Open-Meteo endpoint (current + hourly + daily)
+    const urlWeather = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=relativehumidity_2m,apparent_temperature,visibility,windspeed_10m,winddirection_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+
+    // Open-Meteo Air Quality endpoint (hourly pm2_5 + pm10 or current us_aqi when available)
+    const urlAirQuality = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&hourly=pm10,pm2_5&current=us_aqi&timezone=auto`;
+
+    /* -------------------- PM2.5 -> AQI Mapping (user-provided) -------------------- */
+    function pm25ToAqi(pm25) {
+        if (pm25 <= 12) return { aqi: Math.round(pm25 / 12 * 50), category: 'Good', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.2)' };
+        if (pm25 <= 35.4) return { aqi: Math.round(50 + (pm25 - 12) / 23.4 * 50), category: 'Moderate', color: '#eab308', bgColor: 'rgba(234, 179, 8, 0.2)' };
+        if (pm25 <= 55.4) return { aqi: Math.round(100 + (pm25 - 35.4) / 20 * 50), category: 'Unhealthy for Sensitive', color: '#f97316', bgColor: 'rgba(249, 115, 22, 0.2)' };
+        if (pm25 <= 150.4) return { aqi: Math.round(150 + (pm25 - 55.4) / 95 * 50), category: 'Unhealthy', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.2)' };
+        if (pm25 <= 250.4) return { aqi: Math.round(200 + (pm25 - 150.4) / 100 * 50), category: 'Very Unhealthy', color: '#a855f7', bgColor: 'rgba(168, 85, 247, 0.2)' };
+        return { aqi: 500, category: 'Hazardous', color: '#7f1d1d', bgColor: 'rgba(127, 29, 29, 0.4)' };
+    }
+
+    /* -------------------- CLOCK -------------------- */
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      document.getElementById("time").textContent = timeStr;
+      document.getElementById("iphone-time").textContent = timeStr;
+      document.getElementById("date").textContent = now.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"});
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* -------------------- WEATHER + AQI -------------------- */
+    async function loadWeatherAndAQI(){
+      try {
+        const [rWeather, rAir] = await Promise.allSettled([
+          fetch(urlWeather, {cache: 'no-store'}),
+          fetch(urlAirQuality, {cache: 'no-store'})
+        ]);
+
+        // Weather
+        if (!rWeather || rWeather.status !== 'fulfilled' || !rWeather.value.ok) throw new Error('Weather fetch failed');
+        const d = await rWeather.value.json();
+
+        const cw = d.current_weather || {};
+        const temp = cw.temperature;
+        const windspeed = cw.windspeed;
+        const winddir = cw.winddirection;
+
+        // determine best hourly index for matching values
+        let hIdx = 0;
+        if (d.hourly && Array.isArray(d.hourly.time) && cw && cw.time) {
+          hIdx = d.hourly.time.indexOf(cw.time);
+          if (hIdx === -1) {
+            // find closest hour
+            const cwMs = new Date(cw.time).getTime();
+            let minDiff = Infinity;
+            for (let i=0;i<d.hourly.time.length;i++){
+              const tMs = new Date(d.hourly.time[i]).getTime();
+              const diff = Math.abs(tMs - cwMs);
+              if (diff < minDiff) { minDiff = diff; hIdx = i; }
+            }
+          }
+        }
+
+        // update weather values
+        document.getElementById("main-temp").textContent = (typeof temp === 'number') ? `${Math.round(temp)}°` : '--°';
+        document.getElementById("side-temp").textContent = (typeof temp === 'number') ? `${Math.round(temp)}°C` : '--°';
+        document.getElementById("iphone-temp").textContent = (typeof temp === 'number') ? `${Math.round(temp)}°C` : '--°';
+        document.getElementById("feels").textContent = (d.hourly && d.hourly.apparent_temperature && d.hourly.apparent_temperature[hIdx] !== undefined) ? `${Math.round(d.hourly.apparent_temperature[hIdx])}°C` : '--°';
+        document.getElementById("visibility").textContent = (d.hourly && d.hourly.visibility && d.hourly.visibility[hIdx] !== undefined) ? `${(d.hourly.visibility[hIdx]/1000).toFixed(1)} km` : '-- km';
+        document.getElementById("wind").textContent = (typeof windspeed === 'number') ? `${Math.round(windspeed)} m/s ${winddir}°` : '--';
+        document.getElementById("humidity-box").textContent = (d.hourly && d.hourly.relativehumidity_2m && d.hourly.relativehumidity_2m[hIdx] !== undefined) ? `${Math.round(d.hourly.relativehumidity_2m[hIdx])}%` : '--%';
+
+        // weather code -> description + feather icon mapping
+        const OM = {
+            0: ['Clear', 'sun'],
+            1: ['Mainly clear', 'sun'],
+            2: ['Partly cloudy', 'cloud'],
+            3: ['Overcast', 'cloud'],
+            45: ['Fog', 'cloud'],
+            48: ['Depositing rime fog', 'cloud'],
+            51: ['Light drizzle', 'cloud-drizzle'],
+            52: ['Moderate drizzle', 'cloud-drizzle'],
+            53: ['Dense drizzle', 'cloud-rain'],
+            56: ['Freezing drizzle', 'cloud-rain'],
+            57: ['Dense freezing drizzle', 'cloud-rain'],
+            61: ['Slight rain', 'cloud-rain'],
+            63: ['Moderate rain', 'cloud-rain'],
+            65: ['Heavy rain', 'cloud-rain'],
+            66: ['Freezing rain', 'cloud-rain'],
+            67: ['Heavy freezing rain', 'cloud-rain'],
+            71: ['Slight snow', 'cloud-snow'],
+            73: ['Moderate snow', 'cloud-snow'],
+            75: ['Heavy snow', 'cloud-snow'],
+            77: ['Snow grains', 'cloud-snow'],
+            80: ['Slight rain showers', 'cloud-rain'],
+            81: ['Moderate rain showers', 'cloud-rain'],
+            82: ['Violent rain showers', 'cloud-rain'],
+            85: ['Slight snow showers', 'cloud-snow'],
+            86: ['Heavy snow showers', 'cloud-snow'],
+            95: ['Thunderstorm', 'cloud-lightning'],
+            96: ['Thunderstorm w/ slight hail', 'cloud-lightning'],
+            99: ['Severe thunderstorm', 'cloud-lightning']
+        };
+
+        const code = cw.weathercode;
+        const info = OM[code] || ['Unknown', 'cloud'];
+
+        document.getElementById("weather-desc").textContent = info[0];
+
+        // set feather icon in #weather-icon
+        const iconWrap = document.getElementById('weather-icon');
+        if (iconWrap) {
+          iconWrap.innerHTML = `<i data-feather="${info[1]}" width="48" height="48"></i>`;
+          if (typeof feather !== 'undefined') feather.replace();
+        }
+
+        // Build 7-day forecast (daily arrays) - skip first day (today)
+        const fc = document.getElementById('forecast');
+        fc.innerHTML = '';
+        if (d.daily && Array.isArray(d.daily.time)) {
+          for (let i=1;i<=7 && i<=d.daily.time.length-1;i++){
+            const dateStr = new Date(d.daily.time[i]).toLocaleDateString(undefined, {weekday:'short'});
+            const max = d.daily.temperature_2m_max[i];
+            const min = d.daily.temperature_2m_min[i];
+            const wcode = d.daily.weathercode ? d.daily.weathercode[i] : null;
+            const info2 = OM[wcode] || ['—','cloud'];
+            fc.innerHTML += `
+              <div class="thin-border rounded-lg p-3 text-center">
+                <div class="text-sm text-black mb-2 font-bold">${dateStr}</div>
+                <div class="my-2"><i data-feather="${info2[1]}" width="32" height="32" class="mx-auto"></i></div>
+                <div class="text-lg font-medium">${Math.round(max)}°</div>
+                <div class="text-sm text-black font-bold">${Math.round(min)}°</div>
+              </div>
+            `;
+          }
+          if (typeof feather !== 'undefined') feather.replace();
+        }
+
+        // AIR QUALITY: handle air fetch result (if available)
+        let aqiValue = null, aqiCat = '', aqiColor = '';
+        if (rAir && rAir.status === 'fulfilled' && rAir.value.ok) {
+          try {
+            const air = await rAir.value.json();
+            if (air && air.current && typeof air.current.us_aqi === 'number') {
+              aqiValue = air.current.us_aqi;
+              // simple EPA categories/colors
+              if (aqiValue <= 50) { aqiCat = 'Good'; aqiColor = '#10b981'; }
+              else if (aqiValue <= 100) { aqiCat = 'Moderate'; aqiColor = '#eab308'; }
+              else if (aqiValue <= 150) { aqiCat = 'Unhealthy for Sensitive'; aqiColor = '#f97316'; }
+              else if (aqiValue <= 200) { aqiCat = 'Unhealthy'; aqiColor = '#ef4444'; }
+              else if (aqiValue <= 300) { aqiCat = 'Very Unhealthy'; aqiColor = '#a855f7'; }
+              else { aqiCat = 'Hazardous'; aqiColor = '#7f1d1d'; }
+            } else if (air && air.hourly && air.hourly.pm2_5 && Array.isArray(air.hourly.pm2_5)) {
+              // fallback: compute AQI from nearest pm2_5 reading
+              let idx = 0;
+              if (air.hourly.time && Array.isArray(air.hourly.time) && cw && cw.time) {
+                idx = air.hourly.time.indexOf(cw.time);
+                if (idx === -1) {
+                  // find nearest time
+                  const cwMs = new Date(cw.time).getTime();
+                  let minDiff = Infinity;
+                  for (let i=0;i<air.hourly.time.length;i++){
+                    const tMs = new Date(air.hourly.time[i]).getTime();
+                    const diff = Math.abs(tMs - cwMs);
+                    if (diff < minDiff) { minDiff = diff; idx = i; }
+                  }
                 }
-            });
-        });
-    </script>
+              }
+              const pm25 = air.hourly.pm2_5[idx];
+              if (typeof pm25 === 'number') {
+                const aqiObj = pm25ToAqi(pm25);
+                aqiValue = aqiObj.aqi;
+                aqiCat = aqiObj.category;
+                aqiColor = aqiObj.color;
+              }
+            }
+          } catch (err) {
+            console.warn('Air parse failed', err);
+          }
+        }
+
+        // Update AQI box UI
+        const aqiBox = document.getElementById('aqi-box');
+        if (aqiBox) {
+          if (aqiValue !== null) {
+            aqiBox.textContent = `${aqiValue} · ${aqiCat}`;
+            aqiBox.style.color = aqiColor || '';
+          } else {
+            aqiBox.textContent = '—';
+            aqiBox.style.color = '';
+          }
+        }
+
+      } catch (err) {
+        console.error('loadWeatherAndAQI error', err);
+        // Friendly UI fallback
+        document.getElementById("weather-desc").textContent = 'Weather Unavailable';
+        document.getElementById("main-temp").textContent = '--°';
+        document.getElementById("iphone-temp").textContent = '--°';
+        document.getElementById("side-temp").textContent = '--°';
+        document.getElementById("humidity-box").textContent = '--%';
+        document.getElementById("feels").textContent = '--°';
+        document.getElementById("visibility").textContent = '-- km';
+        document.getElementById("wind").textContent = '--';
+        document.getElementById("aqi-box").textContent = '—';
+      }
+    }
+
+    // initial load and periodic refresh
+    loadWeatherAndAQI();
+    setInterval(loadWeatherAndAQI, 10*60*1000); // every 10 minutes
+
+    /* -------------------- USD -> KZT (exchangerate.host) -------------------- */
+    const CURRENCY_API_KEY = CONFIG.CURRENCY_API_KEY;
+
+
+    async function loadCurrency(retries = 1) {
+      // Try exchangerate.host with your API key
+      if (CURRENCY_API_KEY) {
+        try {
+          const r = await fetch(`https://api.exchangerate.host/live?access_key=${CURRENCY_API_KEY}&currencies=usd,kzt`);
+          if (r.ok) {
+            const j = await r.json();
+            // Check for the rate in the response structure
+            if (j && j.quotes && typeof j.quotes.USDKZT === 'number') {
+              const rate = j.quotes.USDKZT;
+              document.getElementById("usd-kzt").textContent = `$ 1 = ${rate.toFixed(2)} ₸`;
+              document.getElementById("currency-source").textContent = "Source: exchangerate.host";
+              return;
+            }
+          } else {
+            console.warn('exchangerate.host returned status', r.status);
+          }
+        } catch (e) {
+          console.warn('exchangerate.host fetch failed', e);
+        }
+      }
+      
+      // Fallback: exchangerate.host convert endpoint (no key needed)
+      try {
+        const rf = await fetch(`https://api.exchangerate.host/convert?from=USD&to=KZT&amount=1`);
+        if (rf.ok) {
+          const jf = await rf.json();
+          if (jf && typeof jf.result === 'number') {
+            document.getElementById("usd-kzt").textContent = `$ 1 = ${jf.result.toFixed(2)} ₸`;
+            document.getElementById("currency-source").textContent = "Source: exchangerate.host (fallback)";
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('exchangerate.host fallback failed', err);
+      }
+      
+      // If all fails
+      if (retries > 0) {
+        setTimeout(() => loadCurrency(retries - 1), 1500);
+      } else {
+        document.getElementById("usd-kzt").textContent = '— (error)';
+        document.getElementById("currency-source").textContent = "Source: unavailable";
+      }
+    }
+
+    loadCurrency();
+    setInterval(loadCurrency, 12*60*60*1000); // Update every 12 hours (2 times per day)
+
+    /* -------------------- Stocks (Yahoo primary, AllOrigins fallback) -------------------- */
+    async function fetchJsonWithProxyAttempt(url) {
+      // Try direct fetch first
+      try {
+        const r = await fetch(url);
+        if (r.ok) return await r.json();
+        throw new Error('Direct fetch failed: ' + r.status);
+      } catch (err) {
+        // Try AllOrigins proxy as fallback
+        try {
+          const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+          const rp = await fetch(proxyUrl);
+          if (rp.ok) return await rp.json();
+          throw new Error('Proxy fetch failed: ' + rp.status);
+        } catch (err2) {
+          console.warn('Both direct and proxy fetch failed', err, err2);
+          return null;
+        }
+      }
+    }
+
+    async function fetchQuote(symbol) {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
+      const j = await fetchJsonWithProxyAttempt(url);
+      if (!j || !j.quoteResponse || !j.quoteResponse.result || !j.quoteResponse.result[0]) return null;
+      return j.quoteResponse.result[0];
+    }
+
+    async function loadStocks() {
+      // SPY
+      try {
+        const spyQ = await fetchQuote('SPY');
+        if (spyQ) {
+          document.getElementById('spy').textContent = spyQ.regularMarketPrice ? spyQ.regularMarketPrice.toFixed(2) : '—';
+          document.getElementById('spy-chg').textContent = spyQ.regularMarketChangePercent ? `${spyQ.regularMarketChangePercent.toFixed(2)}%` : '—';
+        } else {
+          document.getElementById('spy').textContent = '—';
+          document.getElementById('spy-chg').textContent = '— (no data)';
+        }
+      } catch (err) {
+        console.warn('SPY load error', err);
+        document.getElementById('spy').textContent = '—';
+        document.getElementById('spy-chg').textContent = '—';
+      }
+
+      // Gold (futures GC=F)
+      try {
+        const goldQ = await fetchQuote('GC=F');
+        if (goldQ) {
+          document.getElementById('gold').textContent = goldQ.regularMarketPrice ? goldQ.regularMarketPrice.toFixed(2) : '—';
+          document.getElementById('gold-chg').textContent = goldQ.regularMarketChangePercent ? `${goldQ.regularMarketChangePercent.toFixed(2)}%` : '—';
+        } else {
+          document.getElementById('gold').textContent = '—';
+          document.getElementById('gold-chg').textContent = '— (no data)';
+        }
+      } catch (err) {
+        console.warn('Gold load error', err);
+        document.getElementById('gold').textContent = '—';
+        document.getElementById('gold-chg').textContent = '—';
+      }
+    }
+
+    // initial load + refresh every (2 times per day)
+    loadStocks();
+    setInterval(loadStocks, 12*60*60*1000;
+
+    /* -------------------- DOMContent loaded glue (safe initializers) -------------------- */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure feather icons are replaced if any placeholders exist
+      if (typeof feather !== 'undefined') feather.replace();
+    });
+  </script>
 </body>
 </html>
