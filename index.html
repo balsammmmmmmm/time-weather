@@ -135,16 +135,19 @@
     <!-- Bottom row: Currency + Stocks -->
     <div class="grid grid-cols-2 gap-4">
 
-      <!-- Currency panel -->
-      <div class="thin-border rounded-2xl bg-white p-4 dot-sep">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-sm text-black font-bold">Currency</div>
-            <div class="text-4xl font-medium" id="usd-kzt">$ 1 = — ₸</div>
-            <div class="text-sm text-black mt-1 font-bold" id="currency-source">Source: exchangerate.host</div>
-          </div>
-        </div>
-      </div>
+	<!-- Currency panel -->
+
+	<div class="thin-border rounded-2xl bg-white p-4 dot-sep">
+	  <div class="flex flex-col">
+		<div>
+		  <div class="text-sm text-black font-bold">Currency</div>
+		  <div class="text-4xl font-medium" id="usd-kzt">$ 1 = — ₸</div>
+		  <div class="text-sm text-black mt-1 font-bold" id="currency-source">Source: exchangerate.host</div>
+		</div>
+		<!-- Astana Date/Time -->
+		<div class="text-sm text-gray-700 mt-2 font-bold" id="astana-datetime">Loading date & time...</div>
+	  </div>
+	</div>
 
       <!-- Stocks panel -->
       <div class="thin-border rounded-2xl bg-white p-4 dot-sep">
@@ -161,7 +164,7 @@
           </div>
 
           <div class="thin-border rounded-lg p-4">
-            <div class="text-sm text-black font-bold">Gold (XAU / GC=F)</div>
+            <div class="text-sm text-black font-bold">Gold ETF (GLD)</div>
             <div id="gold" class="text-3xl font-medium">—</div>
             <div id="gold-chg" class="text-base text-black font-bold">—</div>
           </div>
@@ -209,6 +212,26 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
+	
+	function updateAstanaTime() {
+	  const now = new Date();
+	  const options = { 
+		timeZone: "Asia/Almaty", 
+		weekday: 'short', 
+		year: 'numeric', 
+		month: 'short', 
+		day: 'numeric', 
+		hour: 'numeric', 
+		minute: 'numeric', 
+		hour12: true 
+	  };
+	  const astanaTime = now.toLocaleString('en-US', options);
+	  document.getElementById('astana-datetime').textContent = `Astana: ${astanaTime}`;
+	}
+
+	// Update every second
+	setInterval(updateAstanaTime, 1000);
+	updateAstanaTime();
 
     /* -------------------- WEATHER + AQI -------------------- */
     async function loadWeatherAndAQI(){
@@ -395,7 +418,6 @@
     /* -------------------- USD -> KZT (exchangerate.host) -------------------- */
     const CURRENCY_API_KEY = "0d2423dc29bc1192277645ddbd5dd643";
 
-
     async function loadCurrency(retries = 1) {
       // Try exchangerate.host with your API key
       if (CURRENCY_API_KEY) {
@@ -445,71 +467,166 @@
     loadCurrency();
     setInterval(loadCurrency, 12*60*60*1000); // Update every 12 hours (2 times per day)
 
-    /* -------------------- Stocks (Yahoo primary, AllOrigins fallback) -------------------- */
-    async function fetchJsonWithProxyAttempt(url) {
-      // Try direct fetch first
+    /* -------------------- Stocks (Marketstack API - 80 calls/month limit) -------------------- */
+    const MARKETSTACK_API_KEY = "af15321c571265eb73ed531cd3a79538";
+    const STOCK_CACHE_KEY = "stock_data_cache";
+    const STOCK_CACHE_DURATION = 1 * 24 * 60 * 60 * 1000; // 1 day in milliseconds
+
+    function getStockCache() {
       try {
-        const r = await fetch(url);
-        if (r.ok) return await r.json();
-        throw new Error('Direct fetch failed: ' + r.status);
-      } catch (err) {
-        // Try AllOrigins proxy as fallback
-        try {
-          const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-          const rp = await fetch(proxyUrl);
-          if (rp.ok) return await rp.json();
-          throw new Error('Proxy fetch failed: ' + rp.status);
-        } catch (err2) {
-          console.warn('Both direct and proxy fetch failed', err, err2);
-          return null;
+        const cached = localStorage.getItem(STOCK_CACHE_KEY);
+        if (!cached) return null;
+        
+        const data = JSON.parse(cached);
+        const now = Date.now();
+        
+        // Check if cache is still valid (within 1 day)
+        if (data.timestamp && (now - data.timestamp) < STOCK_CACHE_DURATION) {
+          return data;
         }
+        return null;
+      } catch (e) {
+        return null;
       }
     }
 
-    async function fetchQuote(symbol) {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
-      const j = await fetchJsonWithProxyAttempt(url);
-      if (!j || !j.quoteResponse || !j.quoteResponse.result || !j.quoteResponse.result[0]) return null;
-      return j.quoteResponse.result[0];
+    function setStockCache(stockData) {
+      try {
+        const cacheData = {
+          timestamp: Date.now(),
+          stocks: stockData
+        };
+        localStorage.setItem(STOCK_CACHE_KEY, JSON.stringify(cacheData));
+      } catch (e) {
+        console.warn('Failed to cache stock data', e);
+      }
+    }
+
+    async function fetchMultipleStocks() {
+      try {
+        // Fetch both SPY and GLD in a single API call
+        const url = `http://api.marketstack.com/v1/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=SPY,GLD`;
+        const r = await fetch(url);
+        
+        if (!r.ok) {
+          console.warn(`Marketstack returned status ${r.status}`);
+          return null;
+        }
+        
+        const j = await r.json();
+        
+        if (j && j.data && Array.isArray(j.data)) {
+          const result = {};
+          
+          j.data.forEach(stock => {
+            const symbol = stock.symbol;
+            // Calculate percent change from close and previous close
+            const changePercent = stock.close && stock.open ? 
+              ((stock.close - stock.open) / stock.open * 100) : null;
+            
+            result[symbol] = {
+              price: stock.close || stock.adj_close,
+              change: stock.close - stock.open,
+              changePercent: changePercent
+            };
+          });
+          
+          return result;
+        }
+        return null;
+      } catch (err) {
+        console.warn('Marketstack fetch failed:', err);
+        return null;
+      }
     }
 
     async function loadStocks() {
-      // SPY
-      try {
-        const spyQ = await fetchQuote('SPY');
-        if (spyQ) {
-          document.getElementById('spy').textContent = spyQ.regularMarketPrice ? spyQ.regularMarketPrice.toFixed(2) : '—';
-          document.getElementById('spy-chg').textContent = spyQ.regularMarketChangePercent ? `${spyQ.regularMarketChangePercent.toFixed(2)}%` : '—';
-        } else {
-          document.getElementById('spy').textContent = '—';
-          document.getElementById('spy-chg').textContent = '— (no data)';
+      // Try to use cached data first
+      const cached = getStockCache();
+      
+      if (cached && cached.stocks) {
+        console.log('Using cached stock data (updates once per day)');
+        
+        // Display cached SPY data
+        if (cached.stocks.SPY) {
+          const spy = cached.stocks.SPY;
+          document.getElementById('spy').textContent = spy.price ? spy.price.toFixed(2) : '—';
+          const changeText = spy.changePercent ? `${spy.changePercent > 0 ? '+' : ''}${spy.changePercent.toFixed(2)}%` : '—';
+          document.getElementById('spy-chg').textContent = changeText;
+          if (spy.changePercent !== null) {
+            document.getElementById('spy-chg').style.color = spy.changePercent >= 0 ? '#10b981' : '#ef4444';
+          }
         }
-      } catch (err) {
-        console.warn('SPY load error', err);
-        document.getElementById('spy').textContent = '—';
-        document.getElementById('spy-chg').textContent = '—';
+        
+        // Display cached Gold data
+        if (cached.stocks.GLD) {
+          const gold = cached.stocks.GLD;
+          document.getElementById('gold').textContent = gold.price ? gold.price.toFixed(2) : '—';
+          const changeText = gold.changePercent ? `${gold.changePercent > 0 ? '+' : ''}${gold.changePercent.toFixed(2)}%` : '—';
+          document.getElementById('gold-chg').textContent = changeText;
+          if (gold.changePercent !== null) {
+            document.getElementById('gold-chg').style.color = gold.changePercent >= 0 ? '#10b981' : '#ef4444';
+          }
+        }
+        
+        return;
       }
 
-      // Gold (futures GC=F)
+      // No cache or expired - fetch fresh data (uses 1 API call for both stocks)
+      console.log('Fetching fresh stock data from Marketstack API');
+
       try {
-        const goldQ = await fetchQuote('GC=F');
-        if (goldQ) {
-          document.getElementById('gold').textContent = goldQ.regularMarketPrice ? goldQ.regularMarketPrice.toFixed(2) : '—';
-          document.getElementById('gold-chg').textContent = goldQ.regularMarketChangePercent ? `${goldQ.regularMarketChangePercent.toFixed(2)}%` : '—';
+        const stockData = await fetchMultipleStocks();
+        
+        if (stockData) {
+          // Display SPY
+          if (stockData.SPY) {
+            const spy = stockData.SPY;
+            document.getElementById('spy').textContent = spy.price ? spy.price.toFixed(2) : '—';
+            const changeText = spy.changePercent ? `${spy.changePercent > 0 ? '+' : ''}${spy.changePercent.toFixed(2)}%` : '—';
+            document.getElementById('spy-chg').textContent = changeText;
+            if (spy.changePercent !== null) {
+              document.getElementById('spy-chg').style.color = spy.changePercent >= 0 ? '#10b981' : '#ef4444';
+            }
+          } else {
+            document.getElementById('spy').textContent = '—';
+            document.getElementById('spy-chg').textContent = 'unavailable';
+          }
+
+          // Display Gold (GLD)
+          if (stockData.GLD) {
+            const gold = stockData.GLD;
+            document.getElementById('gold').textContent = gold.price ? gold.price.toFixed(2) : '—';
+            const changeText = gold.changePercent ? `${gold.changePercent > 0 ? '+' : ''}${gold.changePercent.toFixed(2)}%` : '—';
+            document.getElementById('gold-chg').textContent = changeText;
+            if (gold.changePercent !== null) {
+              document.getElementById('gold-chg').style.color = gold.changePercent >= 0 ? '#10b981' : '#ef4444';
+            }
+          } else {
+            document.getElementById('gold').textContent = '—';
+            document.getElementById('gold-chg').textContent = 'unavailable';
+          }
+
+          // Cache the results for 1 day
+          setStockCache(stockData);
         } else {
+          document.getElementById('spy').textContent = '—';
+          document.getElementById('spy-chg').textContent = 'error';
           document.getElementById('gold').textContent = '—';
-          document.getElementById('gold-chg').textContent = '— (no data)';
+          document.getElementById('gold-chg').textContent = 'error';
         }
       } catch (err) {
-        console.warn('Gold load error', err);
+        console.warn('Stock load error', err);
+        document.getElementById('spy').textContent = '—';
+        document.getElementById('spy-chg').textContent = 'error';
         document.getElementById('gold').textContent = '—';
-        document.getElementById('gold-chg').textContent = '—';
+        document.getElementById('gold-chg').textContent = 'error';
       }
     }
 
-    // initial load + refresh every (2 times per day)
+    // Load stocks once on page load (no interval to save API calls)
+    // Cache lasts 1 day, so maximum 30-31 API calls per month (well under 80 limit)
     loadStocks();
-    setInterval(loadStocks, 12*60*60*1000);
 
     /* -------------------- DOMContent loaded glue (safe initializers) -------------------- */
     document.addEventListener('DOMContentLoaded', () => {
@@ -519,3 +636,8 @@
   </script>
 </body>
 </html>
+
+
+
+
+
