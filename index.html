@@ -141,7 +141,7 @@
 	  <div class="flex flex-col">
 		<div>
 		  <div class="text-sm text-black font-bold">Currency</div>
-		  <div class="text-4xl font-medium" id="usd-kzt">$ 1 = — ₸</div>
+		  <div class="text-4xl font-medium" id="usd-kzt">$ 1 = - ₸</div>
 		  <div class="text-sm text-black mt-1 font-bold" id="currency-source">Source: exchangerate.host</div>
 		</div>
 		<!-- Astana Date/Time -->
@@ -159,20 +159,19 @@
         <div class="grid grid-cols-2 gap-3 text-xl">
           <div class="thin-border rounded-lg p-4">
             <div class="text-sm text-black font-bold">SPY</div>
-            <div id="spy" class="text-3xl font-medium">—</div>
-            <div id="spy-chg" class="text-base text-black font-bold">—</div>
+            <div id="spy" class="text-3xl font-medium">-</div>
+            <div id="spy-chg" class="text-base text-black font-bold">-</div>
           </div>
 
           <div class="thin-border rounded-lg p-4">
-            <div class="text-sm text-black font-bold">Gold ETF (GLD)</div>
-            <div id="gold" class="text-3xl font-medium">—</div>
-            <div id="gold-chg" class="text-base text-black font-bold">—</div>
+            <div class="text-sm text-black font-bold">Gold XAU(GC=F)</div>
+            <div id="gold" class="text-3xl font-medium">-</div>
+            <div id="gold-chg" class="text-base text-black font-bold">-</div>
           </div>
         </div>
 
         <div class="dotted my-3"></div>
 
-        <div class="text-sm text-black font-bold">Note: Yahoo Finance unofficial endpoint used; CORS may apply when opened locally.</div>
       </div>
 
     </div>
@@ -323,12 +322,12 @@
         const fc = document.getElementById('forecast');
         fc.innerHTML = '';
         if (d.daily && Array.isArray(d.daily.time)) {
-          for (let i=1;i<=7 && i<=d.daily.time.length-1;i++){
+          for (let i=1;i<=8 && i<=d.daily.time.length-1;i++){
             const dateStr = new Date(d.daily.time[i]).toLocaleDateString(undefined, {weekday:'short'});
             const max = d.daily.temperature_2m_max[i];
             const min = d.daily.temperature_2m_min[i];
             const wcode = d.daily.weathercode ? d.daily.weathercode[i] : null;
-            const info2 = OM[wcode] || ['—','cloud'];
+            const info2 = OM[wcode] || ['-','cloud'];
             fc.innerHTML += `
               <div class="thin-border rounded-lg p-3 text-center">
                 <div class="text-sm text-black mb-2 font-bold">${dateStr}</div>
@@ -459,7 +458,7 @@
       if (retries > 0) {
         setTimeout(() => loadCurrency(retries - 1), 1500);
       } else {
-        document.getElementById("usd-kzt").textContent = '— (error)';
+        document.getElementById("usd-kzt").textContent = '- (error)';
         document.getElementById("currency-source").textContent = "Source: unavailable";
       }
     }
