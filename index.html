@@ -505,7 +505,7 @@
     async function fetchMultipleStocks() {
       try {
         // Fetch both SPY and GLD in a single API call
-        const url = `http://api.marketstack.com/v1/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=SPY,GLD`;
+        const url = `https://api.marketstack.com/v1/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=SPY,GLD`;
         const r = await fetch(url);
         
         if (!r.ok) {
