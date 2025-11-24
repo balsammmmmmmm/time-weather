@@ -135,20 +135,19 @@
     <!-- Bottom row: Currency + Stocks -->
     <div class="grid grid-cols-2 gap-4">
 
-	<!-- Currency panel -->
-
-	<div class="thin-border rounded-2xl bg-white p-6 dot-sep">
-	  <div class="flex flex-col">
-		<div>
-		  <div class="text-sm text-black font-bold">Currency</div>
-		  <div class="text-4xl font-medium" id="usd-kzt">$ 1 = - ₸</div>
-		  <div class="text-sm text-black mt-1 font-bold" id="currency-source">Source: exchangerate.host</div>
-		</div>
-		<!-- Astana Date/Time -->
-		<div class="text-sm text-gray-700 mt-2 font-bold" id="astana-datetime">Loading date & time...</div>
-	  </div>
-	</div>
-
+    <!-- Currency panel -->
+    <div class="thin-border rounded-2xl bg-white p-6 dot-sep">
+      <div class="flex flex-col">
+        <div>
+          <div class="text-sm text-black font-bold">Currency</div>
+          <div class="text-4xl font-medium" id="usd-kzt">$ 1 = - ₸</div>
+          <div class="text-xl font-medium mt-2" id="xau-usd">XAU = $ -</div>
+          <div class="text-sm text-black mt-1 font-bold" id="currency-source">Source: exchangerate.host</div>
+        </div>
+        <!-- Astana Date/Time -->
+        <div class="text-sm text-gray-700 mt-2 font-bold" id="astana-datetime">Loading date & time...</div>
+      </div>
+    </div>
       <!-- Stocks panel -->
       <div class="thin-border rounded-2xl bg-white p-6 dot-sep">
         <div class="flex items-center justify-between mb-2">
@@ -416,53 +415,51 @@
 
     /* -------------------- USD -> KZT (exchangerate.host) -------------------- */
     const CURRENCY_API_KEY = "0d2423dc29bc1192277645ddbd5dd643";
-
+    
     async function loadCurrency(retries = 1) {
-      // Try exchangerate.host with your API key
-      if (CURRENCY_API_KEY) {
-        try {
-          const r = await fetch(`https://api.exchangerate.host/live?access_key=${CURRENCY_API_KEY}&currencies=usd,kzt`);
-          if (r.ok) {
-            const j = await r.json();
-            // Check for the rate in the response structure
-            if (j && j.quotes && typeof j.quotes.USDKZT === 'number') {
-              const rate = j.quotes.USDKZT;
-              document.getElementById("usd-kzt").textContent = `$ 1 = ${rate.toFixed(2)} ₸`;
-              document.getElementById("currency-source").textContent = "Source: exchangerate.host";
-              return;
-            }
-          } else {
-            console.warn('exchangerate.host returned status', r.status);
-          }
-        } catch (e) {
-          console.warn('exchangerate.host fetch failed', e);
-        }
-      }
-      
-      // Fallback: exchangerate.host convert endpoint (no key needed)
+      // Use your live endpoint with XAU
       try {
-        const rf = await fetch(`https://api.exchangerate.host/convert?from=USD&to=KZT&amount=1`);
-        if (rf.ok) {
-          const jf = await rf.json();
-          if (jf && typeof jf.result === 'number') {
-            document.getElementById("usd-kzt").textContent = `$ 1 = ${jf.result.toFixed(2)} ₸`;
-            document.getElementById("currency-source").textContent = "Source: exchangerate.host (fallback)";
+        const r = await fetch(`https://api.exchangerate.host/live?access_key=${CURRENCY_API_KEY}&currencies=KZT,XAU`);
+        if (r.ok) {
+          const j = await r.json();
+          
+          // exchangerate.host returns: USDXXX = how much XXX per 1 USD
+          // So: USDKZT = KZT per 1 USD → direct
+          //     USDXAU = XAU per 1 USD → to get USD per XAU, do 1 / USDXAU
+          
+          if (j && j.quotes) {
+            const usdKzt = j.quotes.USDKZT;
+            const usdXau = j.quotes.USDXAU; // e.g., 0.0005 → means 1 USD = 0.0005 XAU
+            
+            if (typeof usdKzt === 'number') {
+              document.getElementById("usd-kzt").textContent = `$ 1 = ${usdKzt.toFixed(2)} ₸`;
+            }
+            
+            if (typeof usdXau === 'number' && usdXau > 0) {
+              const xauUsd = 1 / usdXau; // This is "1 XAU = ? USD"
+              document.getElementById("xau-usd").textContent = `XAU = $ ${xauUsd.toFixed(2)}`;
+            } else {
+              document.getElementById("xau-usd").textContent = `XAU = $ -`;
+            }
+            
+            document.getElementById("currency-source").textContent = "Source: exchangerate.host";
             return;
           }
         }
-      } catch (err) {
-        console.warn('exchangerate.host fallback failed', err);
+      } catch (e) {
+        console.warn('exchangerate.host fetch failed', e);
       }
-      
-      // If all fails
+
+      // Fallback (rarely needed since XAU is supported)
       if (retries > 0) {
         setTimeout(() => loadCurrency(retries - 1), 1500);
       } else {
-        document.getElementById("usd-kzt").textContent = '- (error)';
+        document.getElementById("usd-kzt").textContent = '$ 1 = - ₸';
+        document.getElementById("xau-usd").textContent = 'XAU = $ -';
         document.getElementById("currency-source").textContent = "Source: unavailable";
       }
     }
-
+    
     loadCurrency();
     setInterval(loadCurrency, 12*60*60*1000); // Update every 12 hours (2 times per day)
 
@@ -504,7 +501,7 @@
     async function fetchMultipleStocks() {
       try {
         // Fetch both SPY and GLD in a single API call
-        const url = `https://api.marketstack.com/v1/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=SPY,GC=F`;
+        const url = `https://api.marketstack.com/v1/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=SPY,VOO`;
         const r = await fetch(url);
         
         if (!r.ok) {
