@@ -321,7 +321,7 @@
         const fc = document.getElementById('forecast');
         fc.innerHTML = '';
         if (d.daily && Array.isArray(d.daily.time)) {
-          for (let i=1;i<=8 && i<=d.daily.time.length-1;i++){
+          for (let i=1;i<=6 && i<=d.daily.time.length-1;i++){
             const dateStr = new Date(d.daily.time[i]).toLocaleDateString(undefined, {weekday:'short'});
             const max = d.daily.temperature_2m_max[i];
             const min = d.daily.temperature_2m_min[i];
