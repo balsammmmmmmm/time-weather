@@ -14,11 +14,11 @@
   <!-- Use a neutral system font similar to e-ink -->
   <style>
     :root{
-      --bg: #f7f7f5;
-      --panel: #ffffff;
-      --ink: #000000;
-      --muted: #000000;
-      --dot: rgba(0,0,0,0.06);
+      --bg: #0f0f0f;
+      --panel: #1a1a1a;
+      --ink: #f7f7f5;
+      --muted: #a0a0a0;
+      --dot: rgba(255,255,255,0.05);
     }
     html,body{
       height:100%;
@@ -32,30 +32,35 @@
       background-image: radial-gradient(var(--dot) 1px, transparent 1px);
       background-size: 6px 6px;
     }
-    .thin-border { border: 1px solid rgba(0,0,0,0.08); }
-    .dotted { border-top: 1px dotted rgba(0,0,0,0.08); }
-    @media (max-width: 500px) {
+    .thin-border { border: 1px solid rgba(255,255,255,0.1); }
+    .dotted { border-top: 1px dotted rgba(255,255,255,0.1); }
+    /* Dark mode overrides for Tailwind classes */
+    .bg-white { background-color: var(--panel) !important; }
+    .text-black { color: var(--ink) !important; }
+    .bg-white * { color: var(--ink) !important; }
+    @media (max-width: 900px) {
       #ipad-layout { display: none; }
       #iphone-layout { display: flex; }
     }
-    @media (min-width: 501px) {
+    @media (min-width: 901px) {
       #ipad-layout { display: grid; }
       #iphone-layout { display: none; }
     }
     .ref-img { display:none; }
   </style>
 </head>
-<body class="p-4">
+<body class="">
 
   <!-- iPhone Portrait Layout: Full-screen big time + temp -->
-  <div id="iphone-layout" class="flex flex-col items-center justify-center h-screen gap-4">
+  <div id="iphone-layout" class="flex flex-col items-center justify-center h-full gap-4">
     <div id="iphone-time" class="text-[96px] leading-none font-light tracking-tight select-none"></div>
+    <div id="iphone-date" class="text-xl text-black font-medium select-none"></div>
     <div id="iphone-temp" class="text-5xl font-medium select-none"></div>
     <div id="iphone-sub" class="text-base text-black select-none">Santa Rosa Beach, 32459 · Celsius</div>
   </div>
 
   <!-- iPad Layout (grid 2 columns) -->
-  <div id="ipad-layout" class="min-h-screen grid grid-cols-1 gap-4">
+  <div id="ipad-layout" class="min-h-screen grid grid-cols-1 gap-4 p-4">
 
     <!-- Weather + Forecast (full width) -->
     <div class="grid grid-cols-2 gap-4">
@@ -63,7 +68,11 @@
       <div class="thin-border rounded-2xl bg-white p-6 dot-sep">
         <div class="flex items-start justify-between">
           <div>
-            <div class="text-sm uppercase text-black mb-1 font-bold">Weather</div>
+            <div class="flex items-center gap-2 mb-1">
+              <div class="text-sm uppercase text-black font-bold">Weather</div>
+              <button id="refresh-btn" class="text-xs bg-gray-600 hover:bg-gray-500 text-white px-2 py-1 rounded transition-colors" title="Refresh data">↻</button>
+              <div class="text-xs text-gray-400" id="last-update"></div>
+            </div>
             <div class="flex items-end gap-3">
               <div id="weather-icon" class="w-24 h-24 flex items-center justify-center rounded-md thin-border">
                 <!-- feather icon inserted by JS -->
@@ -123,7 +132,7 @@
     <!-- Forecast panel (full width) -->
     <div class="thin-border rounded-2xl bg-white p-6 dot-sep">
       <div class="flex items-center justify-between">
-        <div class="text-sm uppercase text-black font-bold">7-Day Forecast</div>
+        <div class="text-sm uppercase text-black font-bold">6-Day Forecast</div>
         <div class="text-sm text-black font-bold">Santa Rosa Beach</div>
       </div>
 
@@ -132,20 +141,24 @@
       </div>
     </div>
 
-    <!-- Bottom row: Currency + Stocks -->
-    <div class="grid grid-cols-2 gap-4">
+    <!-- Bottom row: Astana Time + Currency + Stocks -->
+    <div class="grid grid-cols-3 gap-4">
+
+    <!-- Astana DateTime panel -->
+    <div class="flex flex-col thin-border rounded-2xl bg-white p-6 dot-sep flex items-center justify-center gap-2">
+      <div class="text-4xl text-black font-bold ">Astana Time</div>
+      <div id="astana-datetime" class="text-3xl text-black text-center">Loading date & time...</div>
+    </div>
 
     <!-- Currency panel -->
     <div class="thin-border rounded-2xl bg-white p-6 dot-sep">
-      <div class="flex flex-col">
+      <div class="flex flex-col text-center items-center justify-center h-full">
         <div>
-          <div class="text-sm text-black font-bold">Currency</div>
-          <div class="text-4xl font-medium" id="usd-kzt">$ 1 = - ₸</div>
+          <div class="text-3xl text-black font-bold pb-2">Currency</div>
+          <div class="text-4xl font-medium" id="usd-kzt">$1.00 = -₸</div>
           <div class="text-xl font-medium mt-2" id="xau-usd">XAU = $ -</div>
           <div class="text-sm text-black mt-1 font-bold" id="currency-source">Source: exchangerate.host</div>
         </div>
-        <!-- Astana Date/Time -->
-        <div class="text-sm text-gray-700 mt-2 font-bold" id="astana-datetime">Loading date & time...</div>
       </div>
     </div>
       <!-- Stocks panel -->
@@ -163,7 +176,7 @@
           </div>
 
           <div class="thin-border rounded-lg p-4">
-            <div class="text-sm text-black font-bold">Gold XAU(GC=F)</div>
+            <div class="text-sm text-black font-bold">VOO</div>
             <div id="gold" class="text-3xl font-medium">-</div>
             <div id="gold-chg" class="text-base text-black font-bold">-</div>
           </div>
@@ -176,460 +189,7 @@
     </div>
   </div>
 
-  <script>
-    /* -------------------- Utilities & Config -------------------- */
-    // User provided coords (Santa Rosa Beach)
-    const LAT = 30.3960;
-    const LON = -86.2288;
-    const ZIP = "32459";
-    const LOCATION_NAME = "Santa Rosa Beach";
-
-    // Open-Meteo endpoint (current + hourly + daily)
-    const urlWeather = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=relativehumidity_2m,apparent_temperature,visibility,windspeed_10m,winddirection_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
-
-    // Open-Meteo Air Quality endpoint (hourly pm2_5 + pm10 or current us_aqi when available)
-    const urlAirQuality = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&hourly=pm10,pm2_5&current=us_aqi&timezone=auto`;
-
-    /* -------------------- PM2.5 -> AQI Mapping (user-provided) -------------------- */
-    function pm25ToAqi(pm25) {
-        if (pm25 <= 12) return { aqi: Math.round(pm25 / 12 * 50), category: 'Good', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.2)' };
-        if (pm25 <= 35.4) return { aqi: Math.round(50 + (pm25 - 12) / 23.4 * 50), category: 'Moderate', color: '#eab308', bgColor: 'rgba(234, 179, 8, 0.2)' };
-        if (pm25 <= 55.4) return { aqi: Math.round(100 + (pm25 - 35.4) / 20 * 50), category: 'Unhealthy for Sensitive', color: '#f97316', bgColor: 'rgba(249, 115, 22, 0.2)' };
-        if (pm25 <= 150.4) return { aqi: Math.round(150 + (pm25 - 55.4) / 95 * 50), category: 'Unhealthy', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.2)' };
-        if (pm25 <= 250.4) return { aqi: Math.round(200 + (pm25 - 150.4) / 100 * 50), category: 'Very Unhealthy', color: '#a855f7', bgColor: 'rgba(168, 85, 247, 0.2)' };
-        return { aqi: 500, category: 'Hazardous', color: '#7f1d1d', bgColor: 'rgba(127, 29, 29, 0.4)' };
-    }
-
-    /* -------------------- CLOCK -------------------- */
-    function updateClock() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      document.getElementById("time").textContent = timeStr;
-      document.getElementById("iphone-time").textContent = timeStr;
-      document.getElementById("date").textContent = now.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"});
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-	
-	function updateAstanaTime() {
-	  const now = new Date();
-	  const options = { 
-		timeZone: "Asia/Almaty", 
-		weekday: 'short', 
-		year: 'numeric', 
-		month: 'short', 
-		day: 'numeric', 
-		hour: 'numeric', 
-		minute: 'numeric', 
-		hour12: true 
-	  };
-	  const astanaTime = now.toLocaleString('en-US', options);
-	  document.getElementById('astana-datetime').textContent = `Astana: ${astanaTime}`;
-	}
-
-	// Update every second
-	setInterval(updateAstanaTime, 1000);
-	updateAstanaTime();
-
-    /* -------------------- WEATHER + AQI -------------------- */
-    async function loadWeatherAndAQI(){
-      try {
-        const [rWeather, rAir] = await Promise.allSettled([
-          fetch(urlWeather, {cache: 'no-store'}),
-          fetch(urlAirQuality, {cache: 'no-store'})
-        ]);
-
-        // Weather
-        if (!rWeather || rWeather.status !== 'fulfilled' || !rWeather.value.ok) throw new Error('Weather fetch failed');
-        const d = await rWeather.value.json();
-
-        const cw = d.current_weather || {};
-        const temp = cw.temperature;
-        const windspeed = cw.windspeed;
-        const winddir = cw.winddirection;
-
-        // determine best hourly index for matching values
-        let hIdx = 0;
-        if (d.hourly && Array.isArray(d.hourly.time) && cw && cw.time) {
-          hIdx = d.hourly.time.indexOf(cw.time);
-          if (hIdx === -1) {
-            // find closest hour
-            const cwMs = new Date(cw.time).getTime();
-            let minDiff = Infinity;
-            for (let i=0;i<d.hourly.time.length;i++){
-              const tMs = new Date(d.hourly.time[i]).getTime();
-              const diff = Math.abs(tMs - cwMs);
-              if (diff < minDiff) { minDiff = diff; hIdx = i; }
-            }
-          }
-        }
-
-        // update weather values
-        document.getElementById("main-temp").textContent = (typeof temp === 'number') ? `${Math.round(temp)}°` : '--°';
-        document.getElementById("side-temp").textContent = (typeof temp === 'number') ? `${Math.round(temp)}°C` : '--°';
-        document.getElementById("iphone-temp").textContent = (typeof temp === 'number') ? `${Math.round(temp)}°C` : '--°';
-        document.getElementById("feels").textContent = (d.hourly && d.hourly.apparent_temperature && d.hourly.apparent_temperature[hIdx] !== undefined) ? `${Math.round(d.hourly.apparent_temperature[hIdx])}°C` : '--°';
-        document.getElementById("visibility").textContent = (d.hourly && d.hourly.visibility && d.hourly.visibility[hIdx] !== undefined) ? `${(d.hourly.visibility[hIdx]/1000).toFixed(1)} km` : '-- km';
-        document.getElementById("wind").textContent = (typeof windspeed === 'number') ? `${Math.round(windspeed)} m/s ${winddir}°` : '--';
-        document.getElementById("humidity-box").textContent = (d.hourly && d.hourly.relativehumidity_2m && d.hourly.relativehumidity_2m[hIdx] !== undefined) ? `${Math.round(d.hourly.relativehumidity_2m[hIdx])}%` : '--%';
-
-        // weather code -> description + feather icon mapping
-        const OM = {
-            0: ['Clear', 'sun'],
-            1: ['Mainly clear', 'sun'],
-            2: ['Partly cloudy', 'cloud'],
-            3: ['Overcast', 'cloud'],
-            45: ['Fog', 'cloud'],
-            48: ['Depositing rime fog', 'cloud'],
-            51: ['Light drizzle', 'cloud-drizzle'],
-            52: ['Moderate drizzle', 'cloud-drizzle'],
-            53: ['Dense drizzle', 'cloud-rain'],
-            56: ['Freezing drizzle', 'cloud-rain'],
-            57: ['Dense freezing drizzle', 'cloud-rain'],
-            61: ['Slight rain', 'cloud-rain'],
-            63: ['Moderate rain', 'cloud-rain'],
-            65: ['Heavy rain', 'cloud-rain'],
-            66: ['Freezing rain', 'cloud-rain'],
-            67: ['Heavy freezing rain', 'cloud-rain'],
-            71: ['Slight snow', 'cloud-snow'],
-            73: ['Moderate snow', 'cloud-snow'],
-            75: ['Heavy snow', 'cloud-snow'],
-            77: ['Snow grains', 'cloud-snow'],
-            80: ['Slight rain showers', 'cloud-rain'],
-            81: ['Moderate rain showers', 'cloud-rain'],
-            82: ['Violent rain showers', 'cloud-rain'],
-            85: ['Slight snow showers', 'cloud-snow'],
-            86: ['Heavy snow showers', 'cloud-snow'],
-            95: ['Thunderstorm', 'cloud-lightning'],
-            96: ['Thunderstorm w/ slight hail', 'cloud-lightning'],
-            99: ['Severe thunderstorm', 'cloud-lightning']
-        };
-
-        const code = cw.weathercode;
-        const info = OM[code] || ['Unknown', 'cloud'];
-
-        document.getElementById("weather-desc").textContent = info[0];
-
-        // set feather icon in #weather-icon
-        const iconWrap = document.getElementById('weather-icon');
-        if (iconWrap) {
-          iconWrap.innerHTML = `<i data-feather="${info[1]}" width="48" height="48"></i>`;
-          if (typeof feather !== 'undefined') feather.replace();
-        }
-
-        // Build 7-day forecast (daily arrays) - skip first day (today)
-        const fc = document.getElementById('forecast');
-        fc.innerHTML = '';
-        if (d.daily && Array.isArray(d.daily.time)) {
-          for (let i=1;i<=6 && i<=d.daily.time.length-1;i++){
-            const dateStr = new Date(d.daily.time[i]).toLocaleDateString(undefined, {weekday:'short'});
-            const max = d.daily.temperature_2m_max[i];
-            const min = d.daily.temperature_2m_min[i];
-            const wcode = d.daily.weathercode ? d.daily.weathercode[i] : null;
-            const info2 = OM[wcode] || ['-','cloud'];
-            fc.innerHTML += `
-              <div class="thin-border rounded-lg p-3 text-center">
-                <div class="text-sm text-black mb-2 font-bold">${dateStr}</div>
-                <div class="my-2"><i data-feather="${info2[1]}" width="32" height="32" class="mx-auto"></i></div>
-                <div class="text-lg font-medium">${Math.round(max)}°</div>
-                <div class="text-sm text-black font-bold">${Math.round(min)}°</div>
-              </div>
-            `;
-          }
-          if (typeof feather !== 'undefined') feather.replace();
-        }
-
-        // AIR QUALITY: handle air fetch result (if available)
-        let aqiValue = null, aqiCat = '', aqiColor = '';
-        if (rAir && rAir.status === 'fulfilled' && rAir.value.ok) {
-          try {
-            const air = await rAir.value.json();
-            if (air && air.current && typeof air.current.us_aqi === 'number') {
-              aqiValue = air.current.us_aqi;
-              // simple EPA categories/colors
-              if (aqiValue <= 50) { aqiCat = 'Good'; aqiColor = '#10b981'; }
-              else if (aqiValue <= 100) { aqiCat = 'Moderate'; aqiColor = '#eab308'; }
-              else if (aqiValue <= 150) { aqiCat = 'Unhealthy for Sensitive'; aqiColor = '#f97316'; }
-              else if (aqiValue <= 200) { aqiCat = 'Unhealthy'; aqiColor = '#ef4444'; }
-              else if (aqiValue <= 300) { aqiCat = 'Very Unhealthy'; aqiColor = '#a855f7'; }
-              else { aqiCat = 'Hazardous'; aqiColor = '#7f1d1d'; }
-            } else if (air && air.hourly && air.hourly.pm2_5 && Array.isArray(air.hourly.pm2_5)) {
-              // fallback: compute AQI from nearest pm2_5 reading
-              let idx = 0;
-              if (air.hourly.time && Array.isArray(air.hourly.time) && cw && cw.time) {
-                idx = air.hourly.time.indexOf(cw.time);
-                if (idx === -1) {
-                  // find nearest time
-                  const cwMs = new Date(cw.time).getTime();
-                  let minDiff = Infinity;
-                  for (let i=0;i<air.hourly.time.length;i++){
-                    const tMs = new Date(air.hourly.time[i]).getTime();
-                    const diff = Math.abs(tMs - cwMs);
-                    if (diff < minDiff) { minDiff = diff; idx = i; }
-                  }
-                }
-              }
-              const pm25 = air.hourly.pm2_5[idx];
-              if (typeof pm25 === 'number') {
-                const aqiObj = pm25ToAqi(pm25);
-                aqiValue = aqiObj.aqi;
-                aqiCat = aqiObj.category;
-                aqiColor = aqiObj.color;
-              }
-            }
-          } catch (err) {
-            console.warn('Air parse failed', err);
-          }
-        }
-
-        // Update AQI box UI
-        const aqiBox = document.getElementById('aqi-box');
-        if (aqiBox) {
-          if (aqiValue !== null) {
-            aqiBox.textContent = `${aqiValue} · ${aqiCat}`;
-            aqiBox.style.color = aqiColor || '';
-          } else {
-            aqiBox.textContent = '—';
-            aqiBox.style.color = '';
-          }
-        }
-
-      } catch (err) {
-        console.error('loadWeatherAndAQI error', err);
-        // Friendly UI fallback
-        document.getElementById("weather-desc").textContent = 'Weather Unavailable';
-        document.getElementById("main-temp").textContent = '--°';
-        document.getElementById("iphone-temp").textContent = '--°';
-        document.getElementById("side-temp").textContent = '--°';
-        document.getElementById("humidity-box").textContent = '--%';
-        document.getElementById("feels").textContent = '--°';
-        document.getElementById("visibility").textContent = '-- km';
-        document.getElementById("wind").textContent = '--';
-        document.getElementById("aqi-box").textContent = '—';
-      }
-    }
-
-    // initial load and periodic refresh
-    loadWeatherAndAQI();
-    setInterval(loadWeatherAndAQI, 10*60*1000); // every 10 minutes
-
-    /* -------------------- USD -> KZT (exchangerate.host) -------------------- */
-    const CURRENCY_API_KEY = "0d2423dc29bc1192277645ddbd5dd643";
-    
-    async function loadCurrency(retries = 1) {
-      // Use your live endpoint with XAU
-      try {
-        const r = await fetch(`https://api.exchangerate.host/live?access_key=${CURRENCY_API_KEY}&currencies=KZT,XAU`);
-        if (r.ok) {
-          const j = await r.json();
-          
-          // exchangerate.host returns: USDXXX = how much XXX per 1 USD
-          // So: USDKZT = KZT per 1 USD → direct
-          //     USDXAU = XAU per 1 USD → to get USD per XAU, do 1 / USDXAU
-          
-          if (j && j.quotes) {
-            const usdKzt = j.quotes.USDKZT;
-            const usdXau = j.quotes.USDXAU; // e.g., 0.0005 → means 1 USD = 0.0005 XAU
-            
-            if (typeof usdKzt === 'number') {
-              document.getElementById("usd-kzt").textContent = `$ 1 = ${usdKzt.toFixed(2)} ₸`;
-            }
-            
-            if (typeof usdXau === 'number' && usdXau > 0) {
-              const xauUsd = 1 / usdXau; // This is "1 XAU = ? USD"
-              document.getElementById("xau-usd").textContent = `XAU = $ ${xauUsd.toFixed(2)}`;
-            } else {
-              document.getElementById("xau-usd").textContent = `XAU = $ -`;
-            }
-            
-            document.getElementById("currency-source").textContent = "Source: exchangerate.host";
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn('exchangerate.host fetch failed', e);
-      }
-
-      // Fallback (rarely needed since XAU is supported)
-      if (retries > 0) {
-        setTimeout(() => loadCurrency(retries - 1), 1500);
-      } else {
-        document.getElementById("usd-kzt").textContent = '$ 1 = - ₸';
-        document.getElementById("xau-usd").textContent = 'XAU = $ -';
-        document.getElementById("currency-source").textContent = "Source: unavailable";
-      }
-    }
-    
-    loadCurrency();
-    setInterval(loadCurrency, 12*60*60*1000); // Update every 12 hours (2 times per day)
-
-    /* -------------------- Stocks (Marketstack API - 80 calls/month limit) -------------------- */
-    const MARKETSTACK_API_KEY = "af15321c571265eb73ed531cd3a79538";
-    const STOCK_CACHE_KEY = "stock_data_cache";
-    const STOCK_CACHE_DURATION = 1 * 24 * 60 * 60 * 1000; // 1 day in milliseconds
-
-    function getStockCache() {
-      try {
-        const cached = localStorage.getItem(STOCK_CACHE_KEY);
-        if (!cached) return null;
-        
-        const data = JSON.parse(cached);
-        const now = Date.now();
-        
-        // Check if cache is still valid (within 1 day)
-        if (data.timestamp && (now - data.timestamp) < STOCK_CACHE_DURATION) {
-          return data;
-        }
-        return null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function setStockCache(stockData) {
-      try {
-        const cacheData = {
-          timestamp: Date.now(),
-          stocks: stockData
-        };
-        localStorage.setItem(STOCK_CACHE_KEY, JSON.stringify(cacheData));
-      } catch (e) {
-        console.warn('Failed to cache stock data', e);
-      }
-    }
-
-    async function fetchMultipleStocks() {
-      try {
-        // Fetch both SPY and GLD in a single API call
-        const url = `https://api.marketstack.com/v1/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=SPY,VOO`;
-        const r = await fetch(url);
-        
-        if (!r.ok) {
-          console.warn(`Marketstack returned status ${r.status}`);
-          return null;
-        }
-        
-        const j = await r.json();
-        
-        if (j && j.data && Array.isArray(j.data)) {
-          const result = {};
-          
-          j.data.forEach(stock => {
-            const symbol = stock.symbol;
-            // Calculate percent change from close and previous close
-            const changePercent = stock.close && stock.open ? 
-              ((stock.close - stock.open) / stock.open * 100) : null;
-            
-            result[symbol] = {
-              price: stock.close || stock.adj_close,
-              change: stock.close - stock.open,
-              changePercent: changePercent
-            };
-          });
-          
-          return result;
-        }
-        return null;
-      } catch (err) {
-        console.warn('Marketstack fetch failed:', err);
-        return null;
-      }
-    }
-
-    async function loadStocks() {
-      // Try to use cached data first
-      const cached = getStockCache();
-      
-      if (cached && cached.stocks) {
-        console.log('Using cached stock data (updates once per day)');
-        
-        // Display cached SPY data
-        if (cached.stocks.SPY) {
-          const spy = cached.stocks.SPY;
-          document.getElementById('spy').textContent = spy.price ? spy.price.toFixed(2) : '—';
-          const changeText = spy.changePercent ? `${spy.changePercent > 0 ? '+' : ''}${spy.changePercent.toFixed(2)}%` : '—';
-          document.getElementById('spy-chg').textContent = changeText;
-          if (spy.changePercent !== null) {
-            document.getElementById('spy-chg').style.color = spy.changePercent >= 0 ? '#10b981' : '#ef4444';
-          }
-        }
-        
-        // Display cached Gold data
-        if (cached.stocks.GLD) {
-          const gold = cached.stocks.GLD;
-          document.getElementById('gold').textContent = gold.price ? gold.price.toFixed(2) : '—';
-          const changeText = gold.changePercent ? `${gold.changePercent > 0 ? '+' : ''}${gold.changePercent.toFixed(2)}%` : '—';
-          document.getElementById('gold-chg').textContent = changeText;
-          if (gold.changePercent !== null) {
-            document.getElementById('gold-chg').style.color = gold.changePercent >= 0 ? '#10b981' : '#ef4444';
-          }
-        }
-        
-        return;
-      }
-
-      // No cache or expired - fetch fresh data (uses 1 API call for both stocks)
-      console.log('Fetching fresh stock data from Marketstack API');
-
-      try {
-        const stockData = await fetchMultipleStocks();
-        
-        if (stockData) {
-          // Display SPY
-          if (stockData.SPY) {
-            const spy = stockData.SPY;
-            document.getElementById('spy').textContent = spy.price ? spy.price.toFixed(2) : '—';
-            const changeText = spy.changePercent ? `${spy.changePercent > 0 ? '+' : ''}${spy.changePercent.toFixed(2)}%` : '—';
-            document.getElementById('spy-chg').textContent = changeText;
-            if (spy.changePercent !== null) {
-              document.getElementById('spy-chg').style.color = spy.changePercent >= 0 ? '#10b981' : '#ef4444';
-            }
-          } else {
-            document.getElementById('spy').textContent = '—';
-            document.getElementById('spy-chg').textContent = 'unavailable';
-          }
-
-          // Display Gold (GLD)
-          if (stockData.GLD) {
-            const gold = stockData.GLD;
-            document.getElementById('gold').textContent = gold.price ? gold.price.toFixed(2) : '—';
-            const changeText = gold.changePercent ? `${gold.changePercent > 0 ? '+' : ''}${gold.changePercent.toFixed(2)}%` : '—';
-            document.getElementById('gold-chg').textContent = changeText;
-            if (gold.changePercent !== null) {
-              document.getElementById('gold-chg').style.color = gold.changePercent >= 0 ? '#10b981' : '#ef4444';
-            }
-          } else {
-            document.getElementById('gold').textContent = '—';
-            document.getElementById('gold-chg').textContent = 'unavailable';
-          }
-
-          // Cache the results for 1 day
-          setStockCache(stockData);
-        } else {
-          document.getElementById('spy').textContent = '—';
-          document.getElementById('spy-chg').textContent = 'error';
-          document.getElementById('gold').textContent = '—';
-          document.getElementById('gold-chg').textContent = 'error';
-        }
-      } catch (err) {
-        console.warn('Stock load error', err);
-        document.getElementById('spy').textContent = '—';
-        document.getElementById('spy-chg').textContent = 'error';
-        document.getElementById('gold').textContent = '—';
-        document.getElementById('gold-chg').textContent = 'error';
-      }
-    }
-
-    // Load stocks once on page load (no interval to save API calls)
-    // Cache lasts 1 day, so maximum 30-31 API calls per month (well under 80 limit)
-    loadStocks();
-
-    /* -------------------- DOMContent loaded glue (safe initializers) -------------------- */
-    document.addEventListener('DOMContentLoaded', () => {
-      // Ensure feather icons are replaced if any placeholders exist
-      if (typeof feather !== 'undefined') feather.replace();
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
 

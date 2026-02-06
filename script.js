@@ -1,320 +1,387 @@
-// PM2.5 (µg/m³) to AQI converter and color mapping
+/* ================== CONFIG & CONSTANTS ================== */
+const CONFIG = {
+  location: { lat: 30.3960, lon: -86.2288, name: "Santa Rosa Beach", zip: "32459" },
+  timezones: { local: "auto", astana: "Asia/Almaty" },
+  updateIntervals: { clock: 1000, weather: 10 * 60 * 1000, currency: 12 * 60 * 60 * 1000 },
+  cacheDurations: { weather: 10 * 60 * 1000, stocks: 24 * 60 * 60 * 1000 },
+  apis: {
+    weather: `https://api.open-meteo.com/v1/forecast?latitude=30.3960&longitude=-86.2288&current_weather=true&hourly=relativehumidity_2m,apparent_temperature,visibility,windspeed_10m,winddirection_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&forecast_days=16&timezone=auto`,
+    airQuality: `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=30.3960&longitude=-86.2288&hourly=pm10,pm2_5&current=us_aqi&timezone=auto`,
+    currency: `https://api.exchangerate.host/live?access_key=0d2423dc29bc1192277645ddbd5dd643&currencies=KZT,XAU`,
+    stocks: `https://api.marketstack.com/v1/eod/latest?access_key=af15321c571265eb73ed531cd3a79538&symbols=SPY,VOO`
+  }
+};
+
+/* ================== DOM ELEMENT CACHE ================== */
+const DOM = {
+  time: document.getElementById("time"),
+  date: document.getElementById("date"),
+  iPhoneTime: document.getElementById("iphone-time"),
+  iPhoneDate: document.getElementById("iphone-date"),
+  astanaDateTime: document.getElementById("astana-datetime"),
+  
+  mainTemp: document.getElementById("main-temp"),
+  sideTemp: document.getElementById("side-temp"),
+  iPhoneTemp: document.getElementById("iphone-temp"),
+  iPhoneSub: document.getElementById("iphone-sub"),
+  weatherDesc: document.getElementById("weather-desc"),
+  weatherIcon: document.getElementById("weather-icon"),
+  feels: document.getElementById("feels"),
+  visibility: document.getElementById("visibility"),
+  wind: document.getElementById("wind"),
+  humidityBox: document.getElementById("humidity-box"),
+  aqiBox: document.getElementById("aqi-box"),
+  lastUpdate: document.getElementById("last-update"),
+  refreshBtn: document.getElementById("refresh-btn"),
+  forecast: document.getElementById("forecast"),
+  
+  usdKzt: document.getElementById("usd-kzt"),
+  xauUsd: document.getElementById("xau-usd"),
+  currencySource: document.getElementById("currency-source"),
+  
+  spy: document.getElementById("spy"),
+  spyChg: document.getElementById("spy-chg"),
+  gold: document.getElementById("gold"),
+  goldChg: document.getElementById("gold-chg")
+};
+
+/* ================== AQI MAPPING (Consolidated) ================== */
+const AQI_MAPPING = {
+  pm25: [
+    { max: 12, aqi: 50, category: 'Good', color: '#10b981' },
+    { max: 35.4, aqi: 100, category: 'Moderate', color: '#eab308' },
+    { max: 55.4, aqi: 150, category: 'Unhealthy for Sensitive', color: '#f97316' },
+    { max: 150.4, aqi: 200, category: 'Unhealthy', color: '#ef4444' },
+    { max: 250.4, aqi: 300, category: 'Very Unhealthy', color: '#a855f7' },
+    { max: Infinity, aqi: 500, category: 'Hazardous', color: '#7f1d1d' }
+  ],
+  usAqi: [
+    { max: 50, category: 'Good', color: '#10b981' },
+    { max: 100, category: 'Moderate', color: '#eab308' },
+    { max: 150, category: 'Unhealthy for Sensitive', color: '#f97316' },
+    { max: 200, category: 'Unhealthy', color: '#ef4444' },
+    { max: 300, category: 'Very Unhealthy', color: '#a855f7' },
+    { max: Infinity, category: 'Hazardous', color: '#7f1d1d' }
+  ]
+};
+
 function pm25ToAqi(pm25) {
-    // US EPA AQI breakpoints for PM2.5 (24-hour avg)
-    if (pm25 <= 12) return { aqi: Math.round(pm25 / 12 * 50), category: 'Good', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.2)' };
-    if (pm25 <= 35.4) return { aqi: Math.round(50 + (pm25 - 12) / 23.4 * 50), category: 'Moderate', color: '#eab308', bgColor: 'rgba(234, 179, 8, 0.2)' };
-    if (pm25 <= 55.4) return { aqi: Math.round(100 + (pm25 - 35.4) / 20 * 50), category: 'Unhealthy for Sensitive', color: '#f97316', bgColor: 'rgba(249, 115, 22, 0.2)' };
-    if (pm25 <= 150.4) return { aqi: Math.round(150 + (pm25 - 55.4) / 95 * 50), category: 'Unhealthy', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.2)' };
-    if (pm25 <= 250.4) return { aqi: Math.round(200 + (pm25 - 150.4) / 100 * 50), category: 'Very Unhealthy', color: '#a855f7', bgColor: 'rgba(168, 85, 247, 0.2)' };
-    return { aqi: 500, category: 'Hazardous', color: '#7f1d1d', bgColor: 'rgba(127, 29, 29, 0.4)' };
-}
-
-// Clock Functionality
-function updateClock() {
-    const now = new Date();
-    
-    // Time
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('time').textContent = `${hours}:${minutes}`;
-    
-    // Date
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
-}
-
-// Weather Functionality
-async function fetchWeather() {
-    try {
-        // Use fixed coordinates for Santa Rosa Beach, FL
-        const LAT = 30.3938;
-        const LON = -86.2683;
-        // Fetch weather data from Open-Meteo (no API key required)
-        const urlWeather = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=relativehumidity_2m,apparent_temperature,visibility&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
-        const rWeather = await fetch(urlWeather, {cache: 'no-store'});
-        if (!rWeather.ok) throw new Error('Open-Meteo request failed: ' + rWeather.status);
-        const d = await rWeather.json();
-
-        // Fetch air quality from Open-Meteo Air Quality API
-        const urlAir = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=30.396&longitude=-86.2288&hourly=pm10,pm2_5&current=us_aqi&timezone=America%2FChicago`;
-        let air = null;
-        try {
-            const rAir = await fetch(urlAir, {cache: 'no-store'});
-            if (rAir.ok) air = await rAir.json();
-        } catch (e) {
-            air = null;
-        }
-
-        // Small mapping from Open-Meteo weatahercode -> [label, feather-icon]
-        const OM = {
-            0: ['Clear', 'sun'],
-            1: ['Mainly clear', 'sun'],
-            2: ['Partly cloudy', 'cloud'],
-            3: ['Overcast', 'cloud'],
-            45: ['Fog', 'cloud'],
-            48: ['Depositing rime fog', 'cloud'],
-            51: ['Light drizzle', 'cloud-rain'],
-            52: ['Moderate drizzle', 'cloud-rain'],
-            53: ['Dense drizzle', 'cloud-rain'],
-            56: ['Freezing drizzle', 'cloud-rain'],
-            57: ['Dense freezing drizzle', 'cloud-rain'],
-            61: ['Slight rain', 'cloud-rain'],
-            63: ['Moderate rain', 'cloud-rain'],
-            65: ['Heavy rain', 'cloud-rain'],
-            66: ['Freezing rain', 'cloud-rain'],
-            67: ['Heavy freezing rain', 'cloud-rain'],
-            71: ['Slight snow', 'cloud-snow'],
-            73: ['Moderate snow', 'cloud-snow'],
-            75: ['Heavy snow', 'cloud-snow'],
-            77: ['Snow grains', 'cloud-snow'],
-            80: ['Slight rain showers', 'cloud-rain'],
-            81: ['Moderate rain showers', 'cloud-rain'],
-            82: ['Violent rain showers', 'cloud-rain'],
-            85: ['Slight snow showers', 'cloud-snow'],
-            86: ['Heavy snow showers', 'cloud-snow'],
-            95: ['Thunderstorm', 'cloud-lightning'],
-            96: ['Thunderstorm w/ slight hail', 'cloud-lightning'],
-            99: ['Severe thunderstorm', 'cloud-lightning']
-        };
-
-        const cw = d.current_weather || {};
-        const code = cw.weathercode;
-        const info = OM[code] || ['Unknown', 'cloud'];
-
-        // Update DOM with weather data (fixed location label, no coordinates)
-        const elLocation = document.getElementById('location'); if (elLocation) elLocation.textContent = 'Santa Rosa Beach, FL';
-        const elTemp = document.getElementById('temperature'); if (elTemp) elTemp.textContent = (typeof cw.temperature === 'number') ? `${Math.round(cw.temperature)}°` : '--°';
-        const elDesc = document.getElementById('weather-description'); if (elDesc) elDesc.textContent = info[0];
-
-            // Also populate mobile temperature/icon if present
-            const mobileTemp = document.getElementById('mobile-temperature');
-            const mobileIconWrap = document.getElementById('mobile-weather-icon');
-            if (mobileTemp) mobileTemp.textContent = (typeof cw.temperature === 'number') ? `${Math.round(cw.temperature)}°` : '--°';
-            if (mobileIconWrap) {
-                // clear then insert the same feather icon
-                mobileIconWrap.innerHTML = '';
-                const mi = document.createElement('i');
-                mi.setAttribute('data-feather', info[1]);
-                mobileIconWrap.appendChild(mi);
-            }
-
-        // Humidity / wind / feels-like / visibility / air quality
-        const elHum = document.getElementById('humidity');
-        const elWind = document.getElementById('wind');
-        const elFeels = document.getElementById('feels-like');
-        const elVis = document.getElementById('visibility');
-        const elAir = document.getElementById('air-quality');
-        const aqiEl = document.getElementById('air-quality-aqi');
-
-        if (elWind) elWind.textContent = (typeof cw.windspeed === 'number') ? `${Math.round(cw.windspeed)} km/h` : '-- km/h';
-
-        let hIdx = 0;
-        if (d.hourly && Array.isArray(d.hourly.time)) {
-            if (cw && cw.time) {
-                hIdx = d.hourly.time.indexOf(cw.time);
-                if (hIdx === -1) {
-                    // find closest hour
-                    const cwMs = new Date(cw.time).getTime();
-                    let minDiff = Infinity;
-                    for (let i=0;i<d.hourly.time.length;i++){
-                        const tMs = new Date(d.hourly.time[i]).getTime();
-                        const diff = Math.abs(tMs - cwMs);
-                        if (diff < minDiff) { minDiff = diff; hIdx = i; }
-                    }
-                }
-            }
-
-            // humidity
-            const humArr = d.hourly.relativehumidity_2m;
-            if (humArr && humArr.length > hIdx && elHum) elHum.textContent = `${Math.round(humArr[hIdx])}%`;
-
-            // apparent temperature (feels-like)
-            const appArr = d.hourly.apparent_temperature;
-            if (appArr && appArr.length > hIdx && elFeels) elFeels.textContent = `${Math.round(appArr[hIdx])}°`;
-
-            // visibility (meters -> km)
-            const visArr = d.hourly.visibility;
-            if (visArr && visArr.length > hIdx && elVis) {
-                const v = visArr[hIdx];
-                if (typeof v === 'number') {
-                    const km = (v / 1000);
-                    elVis.textContent = `${Math.round(km*10)/10} km`;
-                }
-            }
-        } else {
-            if (elHum) elHum.textContent = '--%';
-            if (elFeels) elFeels.textContent = '--°';
-            if (elVis) elVis.textContent = '-- km';
-        }
-
-        // Air quality (отдельный fetch)
-        let aqiValue = null, aqiCat = '', aqiColor = '', aqiBg = '';
-        if (air && air.current && typeof air.current.us_aqi === 'number') {
-            aqiValue = air.current.us_aqi;
-            // Категория и цвет по EPA
-            if (aqiValue <= 50) { aqiCat = 'Good'; aqiColor = '#10b981'; aqiBg = 'rgba(16,185,129,0.2)'; }
-            else if (aqiValue <= 100) { aqiCat = 'Moderate'; aqiColor = '#eab308'; aqiBg = 'rgba(234,179,8,0.2)'; }
-            else if (aqiValue <= 150) { aqiCat = 'Unhealthy for Sensitive'; aqiColor = '#f97316'; aqiBg = 'rgba(249,115,22,0.2)'; }
-            else if (aqiValue <= 200) { aqiCat = 'Unhealthy'; aqiColor = '#ef4444'; aqiBg = 'rgba(239,68,68,0.2)'; }
-            else if (aqiValue <= 300) { aqiCat = 'Very Unhealthy'; aqiColor = '#a855f7'; aqiBg = 'rgba(168,85,247,0.2)'; }
-            else { aqiCat = 'Hazardous'; aqiColor = '#7f1d1d'; aqiBg = 'rgba(127,29,29,0.4)'; }
-        } else if (air && air.hourly && air.hourly.pm2_5 && Array.isArray(air.hourly.pm2_5)) {
-            // Найти ближайший час к текущему
-            let idx = 0;
-            if (air.hourly.time && Array.isArray(air.hourly.time) && cw && cw.time) {
-                idx = air.hourly.time.indexOf(cw.time);
-                if (idx === -1) idx = 0;
-            }
-            const pm25 = air.hourly.pm2_5[idx];
-            if (typeof pm25 === 'number') {
-                const aqiObj = pm25ToAqi(pm25);
-                aqiValue = aqiObj.aqi;
-                aqiCat = aqiObj.category;
-                aqiColor = aqiObj.color;
-                aqiBg = aqiObj.bgColor;
-            }
-        }
-        if (elAir) {
-            if (aqiValue !== null) {
-                elAir.textContent = `${aqiValue}`;
-                // Use only text color to indicate AQI; avoid colored background
-                elAir.style.color = aqiColor;
-                elAir.style.background = '';
-            } else {
-                elAir.textContent = '—';
-                elAir.style.color = '';
-                elAir.style.background = '';
-            }
-        }
-        if (aqiEl) aqiEl.textContent = aqiCat || '';
-
-        // Update weather icon
-        const icon = document.getElementById('weather-icon');
-        if (icon) {
-            icon.innerHTML = '';
-            const ii = document.createElement('i');
-            ii.setAttribute('data-feather', info[1]);
-            icon.appendChild(ii);
-        }
-
-        // ensure mobile icon renders if present
-        if (typeof feather !== 'undefined') feather.replace();
-
-        // Build forecast array from Open-Meteo daily fields
-        const forecastDays = [];
-        if (d.daily && Array.isArray(d.daily.time)) {
-            const times = d.daily.time;
-            for (let i = 0; i < times.length; i++) {
-                forecastDays.push({
-                    date: times[i],
-                    weathercode: d.daily.weathercode ? d.daily.weathercode[i] : null,
-                    max: d.daily.temperature_2m_max ? d.daily.temperature_2m_max[i] : null,
-                    min: d.daily.temperature_2m_min ? d.daily.temperature_2m_min[i] : null,
-                    sunrise: d.daily.sunrise ? d.daily.sunrise[i] : null,
-                    sunset: d.daily.sunset ? d.daily.sunset[i] : null
-                });
-            }
-        }
-
-        displayForecast(forecastDays, OM);
-        feather.replace();
-    } catch (error) {
-        console.error('Error fetching weather:', error);
-        // Show friendly messages in the existing UI elements (safe)
-        const elDesc = document.getElementById('weather-description'); if (elDesc) elDesc.textContent = 'Weather Unavailable';
-        const elLocation = document.getElementById('location'); if (elLocation) elLocation.textContent = 'Santa Rosa Beach, FL';
-        const elTemp = document.getElementById('temperature'); if (elTemp) elTemp.textContent = '--°';
-        const elHum = document.getElementById('humidity'); if (elHum) elHum.textContent = '--%';
-        const elWind = document.getElementById('wind'); if (elWind) elWind.textContent = '-- km/h';
-        const elFeels = document.getElementById('feels-like'); if (elFeels) elFeels.textContent = '--°';
-        const elVis = document.getElementById('visibility'); if (elVis) elVis.textContent = '-- km';
-        const elAir = document.getElementById('air-quality'); if (elAir) elAir.textContent = '—';
-
-        const forecastContainer = document.getElementById('forecast-container');
-        if (forecastContainer) {
-            forecastContainer.innerHTML = `
-                <div class="col-span-1 sm:col-span-2 md:col-span-7 p-6 text-center bg-gray-700 bg-opacity-50 rounded-xl">
-                    <div class="mb-3"><i data-feather="alert-triangle" class="text-yellow-400 w-8 h-8 inline-block"></i></div>
-                    <div class="font-semibold">Weather data unavailable</div>
-                    <div class="text-sm opacity-80 mb-3">Check API key or network. Click to retry.</div>
-                    <button onclick="fetchWeather()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Retry</button>
-                </div>
-            `;
-            feather.replace();
-        }
+  for (let range of AQI_MAPPING.pm25) {
+    if (pm25 <= range.max) {
+      const prevRange = AQI_MAPPING.pm25[AQI_MAPPING.pm25.indexOf(range) - 1] || { max: 0, aqi: 0 };
+      const ratio = (pm25 - prevRange.max) / (range.max - prevRange.max);
+      const aqi = Math.round(prevRange.aqi + ratio * (range.aqi - prevRange.aqi));
+      return { aqi, category: range.category, color: range.color };
     }
+  }
 }
 
-// Display forecast in the UI
-function displayForecast(forecastDays, omMap) {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const container = document.getElementById('forecast-container');
-    if (!container) return;
-    container.innerHTML = '';
-    forecastDays.forEach(dayData => {
-        const date = new Date(dayData.date);
-        const dayName = days[date.getDay()];
-        const code = dayData.weathercode;
-        const info = omMap && omMap[code] ? omMap[code] : ['Unknown', 'cloud'];
-        const temp = (dayData.max !== null && dayData.min !== null) ? Math.round((dayData.max + dayData.min) / 2) : null;
-        const tempText = temp !== null ? `${temp}°` : '--°';
+function getAqiInfo(value) {
+  for (let range of AQI_MAPPING.usAqi) {
+    if (value <= range.max) return { category: range.category, color: range.color };
+  }
+}
 
-        const forecastItem = document.createElement('div');
-        forecastItem.className = 'bg-gray-700 bg-opacity-50 p-4 rounded-xl text-center';
-        forecastItem.innerHTML = `
-            <p class="font-semibold">${dayName}</p>
-            <div class="my-3">
-                <i data-feather="${info[1]}" class="w-8 h-8 mx-auto"></i>
-            </div>
-            <p class="text-xl font-semibold">${tempText}</p>
-            <p class="text-sm opacity-80">${info[0]}</p>
-        `;
-        container.appendChild(forecastItem);
+/* ================== WEATHER CODE MAP ================== */
+const WEATHER_MAP = {
+  0: ['Clear', 'sun'], 1: ['Mainly clear', 'sun'], 2: ['Partly cloudy', 'cloud'], 3: ['Overcast', 'cloud'],
+  45: ['Fog', 'cloud'], 48: ['Depositing rime fog', 'cloud'], 51: ['Light drizzle', 'cloud-drizzle'],
+  52: ['Moderate drizzle', 'cloud-drizzle'], 53: ['Dense drizzle', 'cloud-rain'], 56: ['Freezing drizzle', 'cloud-rain'],
+  57: ['Dense freezing drizzle', 'cloud-rain'], 61: ['Slight rain', 'cloud-rain'], 63: ['Moderate rain', 'cloud-rain'],
+  65: ['Heavy rain', 'cloud-rain'], 66: ['Freezing rain', 'cloud-rain'], 67: ['Heavy freezing rain', 'cloud-rain'],
+  71: ['Slight snow', 'cloud-snow'], 73: ['Moderate snow', 'cloud-snow'], 75: ['Heavy snow', 'cloud-snow'],
+  77: ['Snow grains', 'cloud-snow'], 80: ['Slight rain showers', 'cloud-rain'], 81: ['Moderate rain showers', 'cloud-rain'],
+  82: ['Violent rain showers', 'cloud-rain'], 85: ['Slight snow showers', 'cloud-snow'], 86: ['Heavy snow showers', 'cloud-snow'],
+  95: ['Thunderstorm', 'cloud-lightning'], 96: ['Thunderstorm w/ slight hail', 'cloud-lightning'],
+  99: ['Severe thunderstorm', 'cloud-lightning']
+};
+
+/* ================== CACHE UTILITIES ================== */
+function getCache(key) {
+  try {
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+    const data = JSON.parse(cached);
+    return Date.now() - data.timestamp < data.duration ? data.value : null;
+  } catch (e) { return null; }
+}
+
+function setCache(key, value, duration) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ value, timestamp: Date.now(), duration }));
+  } catch (e) { console.warn('Cache write failed', e); }
+}
+
+/* ================== CLOCK ================== */
+function updateClock() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const dateStr = now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  
+  DOM.time.textContent = timeStr;
+  DOM.iPhoneTime.textContent = timeStr;
+  DOM.date.textContent = dateStr;
+  DOM.iPhoneDate.textContent = dateStr;
+}
+
+function updateAstanaTime() {
+  const now = new Date();
+  const options = { timeZone: CONFIG.timezones.astana, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+  DOM.astanaDateTime.textContent = now.toLocaleString('en-US', options);
+}
+
+setInterval(updateClock, CONFIG.updateIntervals.clock);
+setInterval(updateAstanaTime, CONFIG.updateIntervals.clock);
+updateClock();
+updateAstanaTime();
+
+/* ================== HELPER: Find Nearest Hourly Index ================== */
+function findNearestHourlyIndex(hourlyTimes, targetTime) {
+  const idx = hourlyTimes.indexOf(targetTime);
+  if (idx !== -1) return idx;
+  
+  const targetMs = new Date(targetTime).getTime();
+  let minDiff = Infinity, nearest = 0;
+  for (let i = 0; i < hourlyTimes.length; i++) {
+    const diff = Math.abs(new Date(hourlyTimes[i]).getTime() - targetMs);
+    if (diff < minDiff) { minDiff = diff; nearest = i; }
+  }
+  return nearest;
+}
+
+
+/* ================== WEATHER + AQI ================== */
+let forceRefresh = false;
+let lastUpdateTime = null;
+
+function updateLastUpdateTime() {
+  lastUpdateTime = new Date();
+  const timeStr = lastUpdateTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (DOM.lastUpdate) DOM.lastUpdate.textContent = `Updated: ${timeStr}`;
+}
+
+function manualRefresh() {
+  forceRefresh = true;
+  loadWeatherAndAQI();
+  loadStocks();
+}
+
+async function loadWeatherAndAQI() {
+  try {
+    const cached = getCache('weather_cache');
+    if (cached && !forceRefresh) {
+      displayWeather(cached.weather);
+      displayAQI(cached.aqi);
+      return;
+    }
+
+    const [rWeather, rAir] = await Promise.allSettled([
+      fetch(CONFIG.apis.weather, { cache: 'no-store' }),
+      fetch(CONFIG.apis.airQuality, { cache: 'no-store' })
+    ]);
+
+    if (!rWeather || rWeather.status !== 'fulfilled' || !rWeather.value.ok) throw new Error('Weather fetch failed');
+    const weatherData = await rWeather.value.json();
+    displayWeather(weatherData);
+
+    let aqiData = null;
+    if (rAir && rAir.status === 'fulfilled' && rAir.value.ok) {
+      try {
+        aqiData = await rAir.value.json();
+        displayAQI(aqiData);
+      } catch (err) { console.warn('Air parse failed', err); }
+    }
+
+    setCache('weather_cache', { weather: weatherData, aqi: aqiData }, CONFIG.cacheDurations.weather);
+    updateLastUpdateTime();
+    forceRefresh = false;
+  } catch (err) {
+    console.error('Weather load error', err);
+    setErrorFallback();
+  }
+}
+
+function displayWeather(data) {
+  const cw = data.current_weather || {};
+  const temp = cw.temperature;
+  const windspeed = cw.windspeed;
+  const winddir = cw.winddirection;
+
+  const hIdx = data.hourly && data.hourly.time ? findNearestHourlyIndex(data.hourly.time, cw.time) : 0;
+
+  DOM.mainTemp.textContent = (typeof temp === 'number') ? `${Math.round(temp)}°` : '--°';
+  DOM.sideTemp.textContent = (typeof temp === 'number') ? `${Math.round(temp)}°C` : '--°';
+  DOM.iPhoneTemp.textContent = (typeof temp === 'number') ? `${Math.round(temp)}°C` : '--°';
+  DOM.feels.textContent = (data.hourly?.apparent_temperature?.[hIdx] !== undefined) ? `${Math.round(data.hourly.apparent_temperature[hIdx])}°C` : '--°C';
+  DOM.visibility.textContent = (data.hourly?.visibility?.[hIdx] !== undefined) ? `${(data.hourly.visibility[hIdx]/1000).toFixed(1)} km` : '-- km';
+  DOM.wind.textContent = (typeof windspeed === 'number') ? `${Math.round(windspeed)} m/s ${winddir}°` : '--';
+  DOM.humidityBox.textContent = (data.hourly?.relativehumidity_2m?.[hIdx] !== undefined) ? `${Math.round(data.hourly.relativehumidity_2m[hIdx])}%` : '--%';
+
+  const code = cw.weathercode;
+  const info = WEATHER_MAP[code] || ['Unknown', 'cloud'];
+  DOM.weatherDesc.textContent = info[0];
+  DOM.weatherIcon.innerHTML = `<i data-feather="${info[1]}" width="48" height="48"></i>`;
+  if (typeof feather !== 'undefined') feather.replace();
+
+  if (data.daily?.time && Array.isArray(data.daily.time)) {
+    const forecastHtml = Array.from({ length: 6 })
+      .map((_, idx) => {
+        const i = idx + 2;
+        if (i >= data.daily.time.length) return '';
+        const dateStr = new Date(data.daily.time[i]).toLocaleDateString(undefined, { weekday: 'short' });
+        const max = Math.round(data.daily.temperature_2m_max[i]);
+        const min = Math.round(data.daily.temperature_2m_min[i]);
+        const wcode = data.daily.weathercode?.[i] || 0;
+        const info2 = WEATHER_MAP[wcode] || ['Clear', 'sun'];
+        return `<div class="thin-border rounded-lg p-3 text-center"><div class="text-sm text-black mb-2 font-bold">${dateStr}</div><div class="my-2"><i data-feather="${info2[1]}" width="32" height="32" class="mx-auto"></i></div><div class="text-lg font-medium">${max}°</div><div class="text-sm text-black font-bold">${min}°</div></div>`;
+      })
+      .join('');
+    DOM.forecast.innerHTML = forecastHtml;
+    if (typeof feather !== 'undefined') feather.replace();
+  }
+}
+
+function displayAQI(data) {
+  let aqiValue = null, aqiCat = '', aqiColor = '';
+
+  if (data?.current?.us_aqi !== undefined) {
+    aqiValue = data.current.us_aqi;
+    const info = getAqiInfo(aqiValue);
+    aqiCat = info.category;
+    aqiColor = info.color;
+  } else if (data?.hourly?.pm2_5) {
+    const cw = data.current_weather || {};
+    const hIdx = data.hourly.time ? findNearestHourlyIndex(data.hourly.time, cw.time) : 0;
+    const pm25 = data.hourly.pm2_5[hIdx];
+    if (typeof pm25 === 'number') {
+      const aqiObj = pm25ToAqi(pm25);
+      aqiValue = aqiObj.aqi;
+      aqiCat = aqiObj.category;
+      aqiColor = aqiObj.color;
+    }
+  }
+
+  if (aqiValue !== null) {
+    DOM.aqiBox.textContent = `${aqiValue} · ${aqiCat}`;
+    DOM.aqiBox.style.color = aqiColor;
+  } else {
+    DOM.aqiBox.textContent = '—';
+    DOM.aqiBox.style.color = '';
+  }
+}
+
+function setErrorFallback() {
+  DOM.weatherDesc.textContent = 'Weather Unavailable';
+  DOM.mainTemp.textContent = '--°';
+  DOM.iPhoneTemp.textContent = '--°';
+  DOM.sideTemp.textContent = '--°';
+  DOM.humidityBox.textContent = '--%';
+  DOM.feels.textContent = '--°C';
+  DOM.visibility.textContent = '-- km';
+  DOM.wind.textContent = '--';
+  DOM.aqiBox.textContent = '—';
+}
+
+loadWeatherAndAQI();
+setInterval(loadWeatherAndAQI, CONFIG.updateIntervals.weather);
+
+/* ================== CURRENCY ================== */
+async function loadCurrency(retries = 1) {
+  try {
+    const r = await fetch(CONFIG.apis.currency);
+    if (r.ok) {
+      const j = await r.json();
+      if (j?.quotes) {
+        const usdKzt = j.quotes.USDKZT;
+        const usdXau = j.quotes.USDXAU;
+        
+        if (typeof usdKzt === 'number') DOM.usdKzt.textContent = `$1.00 = ${usdKzt.toFixed(2)}₸`;
+        if (typeof usdXau === 'number' && usdXau > 0) {
+          DOM.xauUsd.textContent = `XAU = $${(1 / usdXau).toFixed(2)}`;
+        } else {
+          DOM.xauUsd.textContent = 'XAU = $ -';
+        }
+        DOM.currencySource.textContent = "Source: exchangerate.host";
+        return;
+      }
+    }
+  } catch (e) { console.warn('Currency fetch failed', e); }
+
+  if (retries > 0) {
+    setTimeout(() => loadCurrency(retries - 1), 1500);
+  } else {
+    DOM.usdKzt.textContent = '$ 1 = - ₸';
+    DOM.xauUsd.textContent = 'XAU = $ -';
+    DOM.currencySource.textContent = "Source: unavailable";
+  }
+}
+
+loadCurrency();
+setInterval(loadCurrency, CONFIG.updateIntervals.currency);
+
+/* ================== STOCKS (Single Display Function) ================== */
+function displayStockData(stocks) {
+  const displayStock = (symbol, priceId, chgId) => {
+    if (stocks?.[symbol]) {
+      const s = stocks[symbol];
+      document.getElementById(priceId).textContent = s.price ? s.price.toFixed(2) : '—';
+      const chgText = s.changePercent ? `${s.changePercent > 0 ? '+' : ''}${s.changePercent.toFixed(2)}%` : '—';
+      const chgEl = document.getElementById(chgId);
+      chgEl.textContent = chgText;
+      chgEl.style.color = s.changePercent >= 0 ? '#10b981' : '#ef4444';
+    } else {
+      document.getElementById(priceId).textContent = '—';
+      document.getElementById(chgId).textContent = 'unavailable';
+    }
+  };
+  
+  displayStock('SPY', 'spy', 'spy-chg');
+  displayStock('VOO', 'gold', 'gold-chg');
+}
+
+async function loadStocks() {
+  const cached = getCache('stock_cache');
+  if (cached) {
+    console.log('Using cached stock data');
+    displayStockData(cached);
+    return;
+  }
+
+  try {
+    const r = await fetch(CONFIG.apis.stocks);
+    if (!r.ok) throw new Error(`Marketstack returned ${r.status}`);
+
+    const j = await r.json();
+    if (!j?.data) throw new Error('Invalid response');
+
+    const result = {};
+    j.data.forEach(stock => {
+      const changePercent = stock.close && stock.open ? ((stock.close - stock.open) / stock.open * 100) : null;
+      result[stock.symbol] = { price: stock.close || stock.adj_close, changePercent };
     });
-    feather.replace();
+
+    displayStockData(result);
+    setCache('stock_cache', result, CONFIG.cacheDurations.stocks);
+  } catch (err) {
+    console.warn('Stock load error', err);
+    DOM.spy.textContent = '—';
+    DOM.spyChg.textContent = 'error';
+    DOM.gold.textContent = '—';
+    DOM.goldChg.textContent = 'error';
+  }
 }
 
-// Initialize and update once DOM is ready to avoid null element errors
+loadStocks();
+
+/* ================== Icon initialization ================== */
 document.addEventListener('DOMContentLoaded', () => {
-    // Safe update helpers
-    const safeText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
-
-    // Start clock
-    updateClock();
-    setInterval(() => {
-        try { updateClock(); } catch (e) { console.error('Clock update failed:', e); }
-    }, 1000);
-
-    // Initial weather fetch (safe)
-    (async () => {
-        try {
-            await fetchWeather();
-        } catch (err) {
-            console.error('Initial weather fetch failed:', err);
-            safeText('weather-description', 'Weather unavailable');
-        }
-    })();
-
-    // On load also copy temperature/icon into mobile block in case CSS shows it
-    const copyMobileFromMain = () => {
-        const mainTemp = document.getElementById('temperature');
-        const mobileTemp = document.getElementById('mobile-temperature');
-        const mainIcon = document.getElementById('weather-icon');
-        const mobileIconWrap = document.getElementById('mobile-weather-icon');
-        if (mainTemp && mobileTemp) mobileTemp.textContent = mainTemp.textContent;
-        if (mainIcon && mobileIconWrap) {
-            mobileIconWrap.innerHTML = mainIcon.innerHTML;
-            if (typeof feather !== 'undefined') feather.replace();
-        }
-    };
-    copyMobileFromMain();
-
-    // Periodic weather updates (30 minutes)
-    setInterval(() => {
-        fetchWeather().catch(e => console.error('Periodic weather fetch failed:', e));
-    }, 1800000);
-
-    // Add animation class to elements if present
-    const elements = document.querySelectorAll('#time, #date, #location, #temperature, #weather-icon');
-    elements.forEach(el => { if (el) el.classList.add('animate-fade'); });
+  if (typeof feather !== 'undefined') feather.replace();
+  
+  // Setup refresh button
+  if (DOM.refreshBtn) {
+    DOM.refreshBtn.addEventListener('click', manualRefresh);
+  }
+  
+  // Show initial update time
+  updateLastUpdateTime();
 });
